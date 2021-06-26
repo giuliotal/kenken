@@ -1,0 +1,5 @@
+Ogni cella normalmente è un TextField, tuttavia, a seconda della posizione, potrebbe diventare un jpanel che contiene un textfield centrale dove inserire il numero e un textfield in alto a sinistra per inserire il risultato da ottenere nel blocco e il simbolo dell'operazione aritmetica da eseguire
+
+Posso aggiungere dinamicamente la responsabilità di avere il textfiled in alto a sinistra con il pattern decorator: occorre individuare una sola cella all'interno del blocco cui attribuire questa possibilità
+
+Ma ha senso? Potrei semplicemente creare una nuova classe apposita che estende Jpanel e contiene i due TextField.
