@@ -1,4 +1,4 @@
-package support;
+package mvc.model;
 
 public enum MathOperation {
     SOMMA,
