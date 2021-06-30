@@ -2,7 +2,7 @@ package mvc.model;
 
 import java.util.*;
 
-public class GridObject implements GridInterface {
+public class GridObject extends AbstractGridObject {
 
     private final int n;
     private final int[][] griglia;
@@ -28,14 +28,22 @@ public class GridObject implements GridInterface {
         return Collections.unmodifiableList(schemaBlocchi);
     }
 
+    public void inserisciNumero(int numero, int riga, int colonna) {
+        griglia[riga][colonna] = numero;
+    }
+
+    public void eliminaNumero(int riga, int colonna) {
+        griglia[riga][colonna] = 0;
+    }
 
     // TODO O(n^3): da rivedere
-    private List<Cella> verificaDuplicati() {
+    public List<Cella> verificaDuplicati() {
         Set<Cella> celleDuplicate = new HashSet<>();
         for (int riga = 0; riga < n; riga++) {
             for (int colonna = 0; colonna < n; colonna++) {
                 int valore = griglia[riga][colonna];
-                for(int k = 0; k < n; k++){
+                // verifico i duplicati soltanto per i numeri inseriti dall'utente (che sono diversi da 0)
+                for(int k = 0; k < n && valore != 0; k++){
                     if(griglia[riga][k]==valore && k!=colonna){
                         celleDuplicate.add(new Cella(riga, colonna));
                         celleDuplicate.add(new Cella(riga, k));

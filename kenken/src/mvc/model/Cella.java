@@ -33,7 +33,7 @@ public class Cella {
     @Override
     public int hashCode() {
         final int M = 17;
-        int h = 0;
+        int h = 1;
         h = h * riga + M;
         h = h * colonna + M;
         return h;
