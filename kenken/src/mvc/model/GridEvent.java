@@ -2,11 +2,11 @@ package mvc.model;
 
 public class GridEvent {
 
-    private final GridObject source;
+    private final Grid source;
 
-    public GridEvent(GridObject source) {
+    public GridEvent(Grid source) {
         this.source = source;
     }
 
-    public GridObject getSource() {return source;}
+    public Grid getSource() {return source;}
 }

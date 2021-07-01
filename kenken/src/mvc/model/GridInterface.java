@@ -8,13 +8,17 @@ public interface GridInterface {
 
     void removeGridListener(GridListener l);
 
-    void creaBlocco(Cella[] celle, int risultato, MathOperation operazione);
+    void createCage(Square[] s, int result, MathOperation op);
 
-    void inserisciNumero(int numero, int riga, int colonna);
+    void insertNumber(int number, int row, int column);
 
-    void eliminaNumero(int riga, int colonna);
+    void deleteNumber(int row, int column);
 
-    List<Cella> verificaDuplicati();
+    void setSize(int n);
 
-    List<GridObject.Blocco> verificaBlocchi();
+    int getSize();
+
+    List<Square> findDuplicates();
+
+    List<Grid.Cage> findIncorrectCages();
 }

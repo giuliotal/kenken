@@ -3,7 +3,7 @@ package mvc.model;
 import java.util.LinkedList;
 import java.util.List;
 
-public abstract class AbstractGridObject implements GridInterface {
+public abstract class AbstractGrid implements GridInterface {
 
     private final List<GridListener> listeners = new LinkedList<>();
 

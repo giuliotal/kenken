@@ -1,5 +1,3 @@
-import mvc.model.Cella;
-
 import java.util.Arrays;
 
 public class Test {
@@ -32,7 +30,6 @@ public class Test {
         }
     }
     public static void main(String[] args) {
-        int[] v = {1,2,3};
-        permutazioni(v,v.length);
+        int[][] m = new int[0][0];
     }
 }
