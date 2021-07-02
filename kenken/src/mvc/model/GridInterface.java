@@ -8,7 +8,11 @@ public interface GridInterface {
 
     void removeGridListener(GridListener l);
 
-    void createCage(Square[] s, int result, MathOperation op);
+    boolean verifyAdjacency();
+
+    boolean isSelectionEmpty();
+
+    void createCage(int result, MathOperation op);
 
     void insertNumber(int number, int row, int column);
 
@@ -17,6 +21,10 @@ public interface GridInterface {
     void setSize(int n);
 
     int getSize();
+
+    boolean[][] getSelectedSquares();
+
+    void selectSquare(int i, int j);
 
     List<Square> findDuplicates();
 

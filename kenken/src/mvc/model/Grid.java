@@ -8,6 +8,7 @@ public class Grid extends AbstractGrid {
 
     private int n;
     private int[][] grid;
+    private boolean[][] selectedSquares;
 
     // Ogni blocco viene costruito dinamicamente e memorizzato nella lista
     private LinkedList<Cage> cageSchema = new LinkedList<>();
@@ -16,6 +17,7 @@ public class Grid extends AbstractGrid {
     public Grid() {
         this.n = 0;
         this.grid = new int[0][0];
+        this.selectedSquares = new boolean[0][0];
     }
     
     // Inizializzazione manuale della griglia
@@ -30,12 +32,17 @@ public class Grid extends AbstractGrid {
         return Collections.unmodifiableList(cageSchema);
     }
 
+    public boolean[][] getSelectedSquares() {
+        return selectedSquares;
+    }
+
     // cambiare la dimensione significa creare una nuova griglia
     public void setSize(int n) {
         this.n = n;
         this.grid = new int[n][n];
+        this.selectedSquares = new boolean[n][n];
         cageSchema.clear();
-        notifyListeners(new GridEvent(this));
+        notifyListeners(new GridEvent(this, true));
     }
 
     public void insertNumber(int number, int row, int column) {
@@ -73,16 +80,82 @@ public class Grid extends AbstractGrid {
     public List<Cage> findIncorrectCages() {
         List<Cage> incorrectCages = new LinkedList<>();
         for(Cage b : cageSchema) {
-            if(!b.verifyCage())
+            if(!b.verifyTargetResult())
                 incorrectCages.add(b);
         }
         return incorrectCages;
     }
 
-    public void createCage(Square[] s, int result, MathOperation op) {
-        Cage b = new Cage(s, result, op);
+    public void selectSquare(int i, int j) {
+        selectedSquares[i][j] = !selectedSquares[i][j];
+        notifyListeners(new GridEvent(this, true, new Square(i,j)));
+    }
+
+    public void createCage(int result, MathOperation op) {
+        LinkedList<Square> cage = new LinkedList<>();
+        boolean[][] selectionSnapshot = new boolean[n][n];
+        for (int i = 0; i < n; i++) {
+            for (int j = 0; j < n; j++) {
+                if(selectedSquares[i][j]) {
+                    cage.add(new Square(i, j));
+                    selectionSnapshot[i][j] = true;
+                }
+            }
+        }
+        Cage b = new Cage(cage.toArray(new Square[cage.size()]), result, op);
         cageSchema.add(b);
-        //notifyListeners(new GridEvent(this));
+        notifyListeners(new GridEvent(this, true, selectionSnapshot));
+        selectedSquares = new boolean[n][n]; //azzera la selezione corrente
+    }
+
+    public boolean isSelectionEmpty() {
+        for (int i = 0; i < n; i++)
+            for (int j = 0; j < n; j++)
+                if (selectedSquares[i][j])
+                    return false;
+        return true;
+    }
+
+    public boolean verifyAdjacency() {
+        boolean[][] selectionSnapshot = new boolean[n][n];
+        int selectionSize = 0;
+        int startRow = 0;
+        int startColumn = 0;
+
+        for (int i = 0; i < n; i++)
+            for (int j = 0; j < n; j++)
+                if (selectedSquares[i][j]) {
+                    selectionSize++;
+                    selectionSnapshot[i][j] = true;
+                    startRow = i;
+                    startColumn = j;
+                }
+
+        int i = startRow;
+        int j = startColumn;
+
+        return verifyAdjacency(i,j,selectionSize-1, selectionSnapshot) == 0;
+    }
+
+    private int verifyAdjacency(int i, int j, int remaining, boolean[][] squares) {
+        if(i > 0 && squares[i-1][j]) {
+            squares[i][j] = false;
+            remaining = verifyAdjacency(i-1,j,remaining-1,squares); // up
+        }
+        if(i < squares.length-1 && squares[i+1][j]) {
+            squares[i][j] = false;
+            remaining = verifyAdjacency(i+1,j,remaining-1,squares); // down
+        }
+        if(j > 0 && squares[i][j-1]) {
+            squares[i][j] = false;
+            remaining = verifyAdjacency(i,j-1,remaining-1,squares); // left
+        }
+        if(j < squares.length-1 && squares[i][j+1]) {
+            squares[i][j] = false;
+            remaining = verifyAdjacency(i,j+1,remaining-1,squares); //right
+        }
+        squares[i][j] = false;
+        return remaining;
     }
 
     class Cage {
@@ -115,15 +188,15 @@ public class Grid extends AbstractGrid {
             a[j] = tmp;
         }
 
-        public boolean verifyCage() {
-           return verifyCellsCombinations(0);
+        public boolean verifyTargetResult() {
+           return verifyTargetResult(0);
         }
 
         /*
          *  Effettua ricorsivamente delle permutazioni sull'array di celle per verificare il soddisfacimento del vincolo
          *  aritmetico, che dipende dall'ordine degli operandi
          */
-        private boolean verifyCellsCombinations(int i) {
+        private boolean verifyTargetResult(int i) {
             boolean verified = false;
 
             if(i== squares.length){
@@ -147,7 +220,7 @@ public class Grid extends AbstractGrid {
             else {
                 for(int j = i; j< squares.length; j++){
                     swap(squares,i,j);
-                    verified = verifyCellsCombinations(i+1);
+                    verified = verifyTargetResult(i+1);
                     swap(squares,i,j);
                 }
             }
@@ -158,20 +231,6 @@ public class Grid extends AbstractGrid {
             return Arrays.deepToString(squares);
         }
 
-    }
-
-    public static void main(String[] args) {
-        int[][] griglia = {{1,2,3,4},{5,6,7,8},{5,10,11,12}};
-        Grid g = new Grid(griglia.length, griglia);
-        Square c1 = new Square(0,0); //1
-        Square c2 = new Square(1,0); //5
-        Square c3 = new Square(2,0); //9
-        Square[] celle = {c1,c2,c3};
-        g.createCage(celle,4, MathOperation.SUBTRACTION);
-        System.out.print("Blocchi che non soddisfano il vincolo: ");
-        System.out.println(g.findIncorrectCages());
-        System.out.print("Celle che non soddisfano il vincolo: ");
-        System.out.println(g.findDuplicates());
     }
 
 }
