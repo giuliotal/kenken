@@ -9,6 +9,7 @@ public class Grid extends AbstractGrid {
     private int n;
     private int[][] grid;
     private boolean[][] selectedSquares;
+    private int lockedSquares;
 
     // Ogni blocco viene costruito dinamicamente e memorizzato nella lista
     private LinkedList<Cage> cageSchema = new LinkedList<>();
@@ -36,12 +37,15 @@ public class Grid extends AbstractGrid {
         return selectedSquares;
     }
 
+    public int getLockedSquares() { return lockedSquares; }
+
     // cambiare la dimensione significa creare una nuova griglia
     public void setSize(int n) {
         this.n = n;
         this.grid = new int[n][n];
         this.selectedSquares = new boolean[n][n];
         cageSchema.clear();
+        lockedSquares = 0;
         notifyListeners(new GridEvent(this, true));
     }
 
@@ -99,12 +103,13 @@ public class Grid extends AbstractGrid {
                 if(selectedSquares[i][j]) {
                     cage.add(new Square(i, j));
                     selectionSnapshot[i][j] = true;
+                    lockedSquares++;
                 }
             }
         }
-        Cage b = new Cage(cage.toArray(new Square[cage.size()]), result, op);
-        cageSchema.add(b);
-        notifyListeners(new GridEvent(this, true, selectionSnapshot));
+        Cage c = new Cage(cage.toArray(new Square[cage.size()]), result, op);
+        cageSchema.add(c);
+        notifyListeners(new GridEvent(this, true, selectionSnapshot, op, result));
         selectedSquares = new boolean[n][n]; //azzera la selezione corrente
     }
 

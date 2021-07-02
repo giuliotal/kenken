@@ -1,5 +1,5 @@
 import command.HistoryCommandHandler;
-import mvc.controller.GridController;
+import mvc.controller.ControllerPanel;
 import mvc.model.Grid;
 import mvc.model.GridInterface;
 import mvc.view.CreateGridAction;
@@ -20,23 +20,27 @@ public class MainGUI {
         // i bottoni undo e redo li inserisco nel gridController e gli passo come handler l'historyCommandHandler)
 
         final GridPanel gridPanel = new GridPanel(grid, handler);
-        gridPanel.setPreferredSize(new Dimension(400, 400));
+        gridPanel.setPreferredSize(new Dimension(500, 500));
+
+        final ControllerPanel controllerPanel = new ControllerPanel(grid, handler, gridPanel);
 
         JMenu newGame = new JMenu("New game");
         for(int i = 3; i<=6; i++){
-            JMenuItem newGrid = new JMenuItem(new CreateGridAction(grid, gridPanel, handler, i));
+            JMenuItem newGrid = new JMenuItem(new CreateGridAction(grid, gridPanel, controllerPanel, handler, i));
             newGame.add(newGrid);
         }
         menuBar.add(newGame);
 
-        JMenu rules = new JMenu("Rules");
-        menuBar.add(rules);
+        JMenu howToPlay = new JMenu("How to play");
+        JMenuItem rules = new JMenuItem();
+        JMenuItem help = new JMenuItem();
+        howToPlay.add(rules);
+        howToPlay.add(help);
 
-        // TODO inizialmente disattivato, si attiva alla creazione di una nuova griglia
-        final GridController gridController = new GridController(grid, handler, gridPanel);
+        menuBar.add(howToPlay);
 
         JPanel contentPane = new JPanel(new FlowLayout(FlowLayout.LEFT,20,0));
-        contentPane.add(gridController);
+        contentPane.add(controllerPanel);
         contentPane.add(gridPanel);
 
         frame.setTitle("Kenken");

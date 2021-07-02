@@ -7,6 +7,7 @@ import mvc.model.GridListener;
 import mvc.model.Square;
 
 import javax.swing.*;
+import javax.swing.plaf.metal.MetalButtonUI;
 import java.awt.*;
 
 // Concrete Observer (VIEW)
@@ -53,6 +54,8 @@ public class GridPanel extends JPanel implements GridListener {
         if(e.isCageCreated()) {
             // rende persistente la selezione di celle appena confermata dall'utente
             boolean[][] selectedSquares = e.getSelectionSnapshot();
+            int minRow = Integer.MAX_VALUE;
+            int minCol = Integer.MAX_VALUE;
             for (int i = 0; i < n; i++) {
                 for (int j = 0; j < n; j++) {
                     if(selectedSquares[i][j]){
@@ -66,9 +69,31 @@ public class GridPanel extends JPanel implements GridListener {
                         if(j > 0 && selectedSquares[i][j-1]) left = 1;
                         if(j < selectedSquares.length-1 && selectedSquares[i][j+1]) right = 1;
                         button.setBorder(BorderFactory.createMatteBorder(top, left, bottom, right, Color.BLACK));
+
+                        // individuo la cella più in alto a sinistra del blocco, dove inserire il risultato
+                        // da ottenere combinando le cifre del blocco
+                        if(i < minRow && j < minCol){
+                            minRow = i;
+                            minCol = j;
+                        }
                     }
                 }
             }
+            String operation = null;
+            switch(e.getOperation()) {
+                case SUM: operation = "+"; break;
+                case SUBTRACTION: operation = "-"; break;
+                case MULTIPLICATION: operation = "*"; break;
+                case DIVISION: operation = "/"; break;
+            }
+            buttonGrid[minRow][minCol].setText(e.getResult()+operation);
+            buttonGrid[minRow][minCol].setHorizontalAlignment(SwingConstants.LEFT);
+            buttonGrid[minRow][minCol].setVerticalAlignment(SwingConstants.NORTH);
+            buttonGrid[minRow][minCol].setUI(new MetalButtonUI() {
+                protected Color getDisabledTextColor() {
+                    return Color.BLACK;
+                }
+            });
         }
         repaint();
         revalidate();

@@ -3,12 +3,9 @@ package mvc.gridCommand;
 import command.Command;
 import mvc.model.GridInterface;
 import mvc.model.MathOperation;
-import mvc.model.Square;
 import mvc.view.GridPanel;
 
 import javax.swing.*;
-import java.awt.*;
-import java.util.LinkedList;
 
 public class CreateCageCommand implements Command {
 
@@ -44,8 +41,6 @@ public class CreateCageCommand implements Command {
                 return false;
             try {
                 result = Integer.parseInt(input);
-                if(result==JOptionPane.CANCEL_OPTION)
-                    return false;
                 targetResultObtained = true;
             }catch(NumberFormatException e){
                 JOptionPane.showMessageDialog(topFrame,"Please insert an integer value.", "Invalid target result",JOptionPane.ERROR_MESSAGE);

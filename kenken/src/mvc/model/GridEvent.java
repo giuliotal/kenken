@@ -8,6 +8,8 @@ public class GridEvent {
     private boolean cageCreated = false;
     private Square selectedSquare;
     private boolean[][] selectionSnapshot;
+    private MathOperation operation;
+    private int result;
 
     public GridEvent(Grid source) {
         this.source = source;
@@ -24,10 +26,12 @@ public class GridEvent {
         this.selectedSquare = selectedSquare;
     }
 
-    public GridEvent(Grid source, boolean cageCreated, boolean[][] selectionSnapshot) {
+    public GridEvent(Grid source, boolean cageCreated, boolean[][] selectionSnapshot, MathOperation operation, int result) {
         this.source = source;
         this.cageCreated = cageCreated;
         this.selectionSnapshot = selectionSnapshot;
+        this.operation = operation;
+        this.result = result;
     }
 
     public Grid getSource() {return source;}
@@ -50,5 +54,13 @@ public class GridEvent {
 
     public boolean[][] getSelectionSnapshot() {
         return selectionSnapshot;
+    }
+
+    public MathOperation getOperation() {
+        return operation;
+    }
+
+    public int getResult() {
+        return result;
     }
 }
