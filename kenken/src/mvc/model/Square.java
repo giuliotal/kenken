@@ -17,13 +17,6 @@ public class Square {
         return column;
     }
 
-    public boolean isAdjacentTo(Square s) {
-        int distance = 0;
-        distance += Math.abs(s.row - this.row);
-        distance += Math.abs(s.column - this.column);
-        return distance == 1;
-    }
-
     @Override
     public String toString() {
         return "<"+ row +","+ column +">";

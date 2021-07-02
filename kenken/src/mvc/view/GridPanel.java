@@ -36,6 +36,10 @@ public class GridPanel extends JPanel implements GridListener {
         return selectedSquares;
     }
 
+    public void resetSelection() {
+        selectedSquares = new boolean[gridSize][gridSize];
+    }
+
     @Override
     protected void paintComponent(Graphics g) {
         super.paintComponent(g);
