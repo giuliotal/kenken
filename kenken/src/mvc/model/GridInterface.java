@@ -18,6 +18,8 @@ public interface GridInterface {
 
     void deleteNumber(int row, int column);
 
+    void clear();
+
     void setSize(int n);
 
     int getSize();
@@ -29,4 +31,6 @@ public interface GridInterface {
     List<Square> findDuplicates();
 
     List<Grid.Cage> findIncorrectCages();
+
+    void checkConstraints();
 }

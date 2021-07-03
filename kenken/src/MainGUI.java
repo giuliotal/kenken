@@ -32,8 +32,8 @@ public class MainGUI {
         menuBar.add(newGame);
 
         JMenu howToPlay = new JMenu("How to play");
-        JMenuItem rules = new JMenuItem();
-        JMenuItem help = new JMenuItem();
+        JMenuItem rules = new JMenuItem("KenKen rules");
+        JMenuItem help = new JMenuItem("Help");
         howToPlay.add(rules);
         howToPlay.add(help);
 

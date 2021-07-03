@@ -12,7 +12,7 @@ public class Grid extends AbstractGrid {
     private int lockedSquares;
 
     // Ogni blocco viene costruito dinamicamente e memorizzato nella lista
-    private LinkedList<Cage> cageSchema = new LinkedList<>();
+    private final LinkedList<Cage> cageSchema = new LinkedList<>();
 
     // Inizializzazione di una griglia vuota
     public Grid() {
@@ -46,17 +46,27 @@ public class Grid extends AbstractGrid {
         this.selectedSquares = new boolean[n][n];
         cageSchema.clear();
         lockedSquares = 0;
-        notifyListeners(new GridEvent(this, true));
+        notifyListeners(new GridEvent.Builder(this).newGrid(true).build());
     }
 
     public void insertNumber(int number, int row, int column) {
         grid[row][column] = number;
-        notifyListeners(new GridEvent(this));
+        System.out.println(Arrays.deepToString(grid));
+        notifyListeners(new GridEvent.Builder(this).userInteracted(true).build());
     }
 
     public void deleteNumber(int row, int column) {
         grid[row][column] = 0;
-        notifyListeners(new GridEvent(this));
+//        notifyListeners(new GridEvent.Builder(this).build());
+    }
+
+    public void clear() {
+        for (int i = 0; i < n; i++) {
+            for (int j = 0; j < n; j++) {
+                grid[i][j] = 0;
+            }
+        }
+        notifyListeners(new GridEvent.Builder(this).cageCleared(true).build());
     }
 
     // TODO O(n^3): da rivedere
@@ -84,15 +94,37 @@ public class Grid extends AbstractGrid {
     public List<Cage> findIncorrectCages() {
         List<Cage> incorrectCages = new LinkedList<>();
         for(Cage b : cageSchema) {
-            if(!b.verifyTargetResult())
+            if(!b.checkTargetResult())
                 incorrectCages.add(b);
         }
         return incorrectCages;
     }
 
+    public void checkConstraints() {
+        List<Square> duplicateSquares = findDuplicates();
+        List<Square> invalidTargetResult = new LinkedList<>();
+        // individuo soltanto le celle contententi il target result non soddisfatto e rendo quest'ultimo rosso, non l'intero blocco
+        for(Cage c : findIncorrectCages()){
+            int minRow = Integer.MAX_VALUE;
+            int minCol = Integer.MAX_VALUE;
+            Square targetResultSquare = null;
+            for(Square s : c.getSquares()) {
+                int i = s.getRow();
+                int j = s.getColumn();
+                if(i < minRow && j < minCol) {
+                    minRow = i;
+                    minCol = j;
+                    targetResultSquare = s;
+                }
+            }
+            invalidTargetResult.add(targetResultSquare);
+        }
+        notifyListeners(new GridEvent.Builder(this).constraintsChecked(true).duplicateSquares(duplicateSquares).invalidTargetResultSquares(invalidTargetResult).build());
+    }
+
     public void selectSquare(int i, int j) {
         selectedSquares[i][j] = !selectedSquares[i][j];
-        notifyListeners(new GridEvent(this, true, new Square(i,j)));
+        notifyListeners(new GridEvent.Builder(this).squareSelected(true).selectedSquare(new Square(i,j)).build());
     }
 
     public void createCage(int result, MathOperation op) {
@@ -109,7 +141,7 @@ public class Grid extends AbstractGrid {
         }
         Cage c = new Cage(cage.toArray(new Square[cage.size()]), result, op);
         cageSchema.add(c);
-        notifyListeners(new GridEvent(this, true, selectionSnapshot, op, result));
+        notifyListeners(new GridEvent.Builder(this).cageCreated(true).selectionSnapshot(selectionSnapshot).operation(op).result(result).build());
         selectedSquares = new boolean[n][n]; //azzera la selezione corrente
     }
 
@@ -179,7 +211,7 @@ public class Grid extends AbstractGrid {
             this.operation = operation;
         }
 
-        public List<Square> getCells() {return Arrays.asList(squares);}
+        public List<Square> getSquares() {return Arrays.asList(squares);}
 
         public int getSize() {return squares.length;}
 
@@ -193,18 +225,22 @@ public class Grid extends AbstractGrid {
             a[j] = tmp;
         }
 
-        public boolean verifyTargetResult() {
-           return verifyTargetResult(0);
+        public boolean checkTargetResult() {
+           for(Square s : squares) {
+               if(grid[s.getRow()][s.getColumn()] == 0) //vuol dire che il blocco non è stato riempito completamente
+                   return true;
+           }
+           return checkTargetResult(0);
         }
 
         /*
          *  Effettua ricorsivamente delle permutazioni sull'array di celle per verificare il soddisfacimento del vincolo
          *  aritmetico, che dipende dall'ordine degli operandi
          */
-        private boolean verifyTargetResult(int i) {
+        private boolean checkTargetResult(int i) {
             boolean verified = false;
 
-            if(i== squares.length){
+            if(i == squares.length){
                 Square square = squares[0];
                 int res = grid[square.getRow()][square.getColumn()];
                 for(int k = 1; k < squares.length; k++){
@@ -225,7 +261,7 @@ public class Grid extends AbstractGrid {
             else {
                 for(int j = i; j< squares.length; j++){
                     swap(squares,i,j);
-                    verified = verifyTargetResult(i+1);
+                    verified = checkTargetResult(i+1);
                     swap(squares,i,j);
                 }
             }

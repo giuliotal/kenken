@@ -32,7 +32,7 @@ public class CreateGridCommand implements Command {
             if(ret != JOptionPane.YES_OPTION) return false;
         }
         grid.setSize(n);
-        controllerPanel.enableButtons();
+        controllerPanel.enableControlButtons();
         return true;
     }
 

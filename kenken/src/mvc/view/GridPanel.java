@@ -1,14 +1,21 @@
 package mvc.view;
 
 import command.CommandHandler;
+import mvc.gridCommand.InsertNumberCommand;
 import mvc.model.GridEvent;
 import mvc.model.GridInterface;
 import mvc.model.GridListener;
 import mvc.model.Square;
 
 import javax.swing.*;
+import javax.swing.event.DocumentEvent;
+import javax.swing.event.DocumentListener;
 import javax.swing.plaf.metal.MetalButtonUI;
+import javax.swing.text.AbstractDocument;
+import javax.swing.text.BadLocationException;
+import javax.swing.text.DocumentFilter;
 import java.awt.*;
+import java.util.List;
 
 // Concrete Observer (VIEW)
 public class GridPanel extends JPanel implements GridListener {
@@ -19,18 +26,21 @@ public class GridPanel extends JPanel implements GridListener {
     private final CommandHandler commandHandler;
     private int gridSize;
     private JButton[][] buttonGrid;
+    private JTextField[][] inputGrid;
+    private final InputFilter documentFilter = new InputFilter();
 
     public GridPanel(GridInterface grid, CommandHandler commandHandler) {
         this.grid = grid;
         this.gridSize = grid.getSize();
         this.buttonGrid = new JButton[gridSize][gridSize];
+        this.inputGrid = new JTextField[gridSize][gridSize];
         this.commandHandler = commandHandler;
         grid.addGridListener(this);
     }
 
     public JButton[][] getButtonGrid() {
         return buttonGrid;
-    } //TODO dovrei restituire una copia?
+    }
 
     @Override
     protected void paintComponent(Graphics g) {
@@ -43,6 +53,7 @@ public class GridPanel extends JPanel implements GridListener {
         if(e.isNewGrid()) { // se le dimensioni della griglia sono cambiate, ricostruisco interamente il pannello
             this.gridSize = n;
             this.buttonGrid = new JButton[n][n];
+            this.inputGrid = new JTextField[n][n];
             rebuildGrid();
         }
         if(e.isSquareSelected()) {
@@ -86,14 +97,49 @@ public class GridPanel extends JPanel implements GridListener {
                 case MULTIPLICATION: operation = "*"; break;
                 case DIVISION: operation = "/"; break;
             }
-            buttonGrid[minRow][minCol].setText(e.getResult()+operation);
-            buttonGrid[minRow][minCol].setHorizontalAlignment(SwingConstants.LEFT);
-            buttonGrid[minRow][minCol].setVerticalAlignment(SwingConstants.NORTH);
-            buttonGrid[minRow][minCol].setUI(new MetalButtonUI() {
+            JButton targetResultButton = buttonGrid[minRow][minCol];
+            targetResultButton.setText(e.getResult()+operation);
+            targetResultButton.setFont(targetResultButton.getFont().deriveFont(Font.BOLD, 30));
+            targetResultButton.setHorizontalAlignment(SwingConstants.LEFT);
+            targetResultButton.setVerticalAlignment(SwingConstants.NORTH);
+            targetResultButton.setUI(new MetalButtonUI() {
                 protected Color getDisabledTextColor() {
                     return Color.BLACK;
                 }
             });
+        }
+        if(e.isCageCleared()) {
+            for (int i = 0; i < gridSize; i++) {
+                for (int j = 0; j < gridSize; j++) {
+                    inputGrid[i][j].setText("");
+                }
+            }
+        }
+        if(e.areConstraintsChecked()) {
+            List<Square> duplicateSquares = e.getDuplicateSquares();
+            List<Square> invalidTargetResult = e.getInvalidTargetResultSquares();
+            for(Square s : duplicateSquares) {
+                inputGrid[s.getRow()][s.getColumn()].setForeground(Color.RED);
+            }
+            for(Square s : invalidTargetResult) {
+                buttonGrid[s.getRow()][s.getColumn()].setUI(new MetalButtonUI() {
+                    protected Color getDisabledTextColor() {
+                        return Color.RED;
+                    }
+                });
+            }
+        }
+        if(e.didUserInteract()) {
+            for (int i = 0; i < gridSize; i++) {
+                for (int j = 0; j < gridSize; j++) {
+                    inputGrid[i][j].setForeground(Color.BLACK);
+                    buttonGrid[i][j].setUI(new MetalButtonUI() {
+                        protected Color getDisabledTextColor() {
+                            return Color.BLACK;
+                        }
+                    });
+                }
+            }
         }
         repaint();
         revalidate();
@@ -109,13 +155,61 @@ public class GridPanel extends JPanel implements GridListener {
                 square.setPreferredSize(new Dimension(80, 80));
                 square.setBackground(Color.WHITE);
                 square.setOpaque(true);
-                // comunico la pressione del bottone al controller, che la gestisce opportunamente con un apposito command
-                // N.B. la view raccoglie l'interazione dell'utente ma è il controller che la processa
-                //gridButton.addActionListener();
                 add(square);
             }
         }
     }
 
+    public void startGame() {
+        int n = gridSize;
+        for (int i = 0; i < n; i++) {
+            for (int j = 0; j < n; j++) {
+                JTextField input = new JTextField();
+                input.setFont(input.getFont().deriveFont(Font.PLAIN, 50));
+                ((AbstractDocument) input.getDocument()).setDocumentFilter(documentFilter);
+                int row = i;
+                int column = j;
+
+                // ascolta inserimenti e rimozioni all'interno del JTextField
+                input.getDocument().addDocumentListener(new DocumentListener() {
+                    @Override
+                    public void insertUpdate(DocumentEvent documentEvent) {
+                        int val = Integer.parseInt(input.getText());
+                        commandHandler.handle(new InsertNumberCommand(grid,row,column,val));
+                    }
+
+                    @Override
+                    public void removeUpdate(DocumentEvent documentEvent) {
+                        commandHandler.handle(new InsertNumberCommand(grid,row,column,0)); //TODO DeleteNumberCommand
+                    }
+
+                    @Override
+                    public void changedUpdate(DocumentEvent documentEvent) {}
+                });
+                inputGrid[i][j] = input;
+
+                buttonGrid[i][j].setLayout(new GridLayout(2,3));
+                buttonGrid[i][j].add(Box.createVerticalGlue());
+                buttonGrid[i][j].add(Box.createVerticalGlue());
+                buttonGrid[i][j].add(Box.createVerticalGlue());
+                buttonGrid[i][j].add(Box.createVerticalGlue());
+                buttonGrid[i][j].add(input);
+                buttonGrid[i][j].add(Box.createVerticalGlue());
+            }
+        }
+        revalidate();
+    }
+
+    class InputFilter extends DocumentFilter {
+        public void replace(DocumentFilter.FilterBypass fb, int offset, int length, String text, javax.swing.text.AttributeSet attr) throws BadLocationException {
+            if(text.equals("")) {
+                fb.getDocument().remove(0,1); // svuota il JTextField
+                return;
+            }
+            int documentLength = fb.getDocument().getLength();
+            if (documentLength - length + text.length() <= 1)
+                fb.insertString(offset, text.replaceAll("[^1-"+gridSize+"]", ""), attr);
+        }
+    }
 
 }
