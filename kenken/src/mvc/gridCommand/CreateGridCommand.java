@@ -33,6 +33,9 @@ public class CreateGridCommand implements Command {
         }
         grid.setSize(n);
         controllerPanel.enableControlButtons();
+        controllerPanel.setClearGridButton(false);
+        controllerPanel.setCheckConstraintsButton(false);
+        controllerPanel.setShowSolutionsButton(false);
         return true;
     }
 

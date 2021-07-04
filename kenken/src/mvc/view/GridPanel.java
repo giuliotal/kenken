@@ -49,6 +49,7 @@ public class GridPanel extends JPanel implements GridListener {
 
     @Override
     public void gridChanged(GridEvent e) {
+        JFrame topFrame = (JFrame) SwingUtilities.getWindowAncestor(this);
         int n = e.getSource().getSize();
         if(e.isNewGrid()) { // se le dimensioni della griglia sono cambiate, ricostruisco interamente il pannello
             this.gridSize = n;
@@ -99,7 +100,7 @@ public class GridPanel extends JPanel implements GridListener {
             }
             JButton targetResultButton = buttonGrid[minRow][minCol];
             targetResultButton.setText(e.getResult()+operation);
-            targetResultButton.setFont(targetResultButton.getFont().deriveFont(Font.BOLD, 30));
+            targetResultButton.setFont(targetResultButton.getFont().deriveFont(Font.BOLD, 20));
             targetResultButton.setHorizontalAlignment(SwingConstants.LEFT);
             targetResultButton.setVerticalAlignment(SwingConstants.NORTH);
             targetResultButton.setUI(new MetalButtonUI() {
@@ -115,7 +116,7 @@ public class GridPanel extends JPanel implements GridListener {
                 }
             }
         }
-        if(e.areConstraintsChecked()) {
+        if(e.isConstraintChecked()) {
             List<Square> duplicateSquares = e.getDuplicateSquares();
             List<Square> invalidTargetResult = e.getInvalidTargetResultSquares();
             for(Square s : duplicateSquares) {
@@ -129,7 +130,7 @@ public class GridPanel extends JPanel implements GridListener {
                 });
             }
         }
-        if(e.didUserInteract()) {
+        if(e.isNumberInserted()) {
             for (int i = 0; i < gridSize; i++) {
                 for (int j = 0; j < gridSize; j++) {
                     inputGrid[i][j].setForeground(Color.BLACK);
@@ -141,6 +142,21 @@ public class GridPanel extends JPanel implements GridListener {
                 }
             }
         }
+        if(e.isSolutionRequested()) {
+            int[][] currentSolution = e.getSource().getCurrentSolution();
+            if(currentSolution != null) {
+                for (int i = 0; i < gridSize; i++) {
+                    for (int j = 0; j < gridSize; j++) {
+                        inputGrid[i][j].setText("");
+                        inputGrid[i][j].setText(currentSolution[i][j] + "");
+                    }
+                }
+            }
+            else {
+                JOptionPane.showMessageDialog(topFrame,"There are no solutions for this game!",
+                        "Unsolvable game",JOptionPane.ERROR_MESSAGE);
+            }
+        }
         repaint();
         revalidate();
     }
@@ -150,26 +166,32 @@ public class GridPanel extends JPanel implements GridListener {
         this.setLayout(new GridLayout(gridSize, gridSize));
         for (int i = 0; i < gridSize; i++) {
             for (int j = 0; j < gridSize; j++) {
+
                 JButton square = new JButton(new SelectSquareAction(grid, this, commandHandler));
-                buttonGrid[i][j] = square;
-                square.setPreferredSize(new Dimension(80, 80));
+                square.setLayout(new BoxLayout(square,BoxLayout.Y_AXIS));
+                square.add(Box.createRigidArea(new Dimension(0,25)));
                 square.setBackground(Color.WHITE);
                 square.setOpaque(true);
+
+                buttonGrid[i][j] = square;
                 add(square);
             }
         }
     }
 
-    public void startGame() {
+    public void startGameView() {
         int n = gridSize;
         for (int i = 0; i < n; i++) {
             for (int j = 0; j < n; j++) {
+
                 JTextField input = new JTextField();
-                input.setFont(input.getFont().deriveFont(Font.PLAIN, 50));
+                input.setFont(input.getFont().deriveFont(Font.PLAIN, 35));
+                input.setHorizontalAlignment(JTextField.CENTER);
+                input.setBorder(BorderFactory.createEmptyBorder());
                 ((AbstractDocument) input.getDocument()).setDocumentFilter(documentFilter);
+
                 int row = i;
                 int column = j;
-
                 // ascolta inserimenti e rimozioni all'interno del JTextField
                 input.getDocument().addDocumentListener(new DocumentListener() {
                     @Override
@@ -180,21 +202,15 @@ public class GridPanel extends JPanel implements GridListener {
 
                     @Override
                     public void removeUpdate(DocumentEvent documentEvent) {
-                        commandHandler.handle(new InsertNumberCommand(grid,row,column,0)); //TODO DeleteNumberCommand
+                        commandHandler.handle(new InsertNumberCommand(grid,row,column,0));
                     }
 
                     @Override
                     public void changedUpdate(DocumentEvent documentEvent) {}
                 });
-                inputGrid[i][j] = input;
 
-                buttonGrid[i][j].setLayout(new GridLayout(2,3));
-                buttonGrid[i][j].add(Box.createVerticalGlue());
-                buttonGrid[i][j].add(Box.createVerticalGlue());
-                buttonGrid[i][j].add(Box.createVerticalGlue());
-                buttonGrid[i][j].add(Box.createVerticalGlue());
-                buttonGrid[i][j].add(input);
-                buttonGrid[i][j].add(Box.createVerticalGlue());
+                buttonGrid[i][j].add(input, BorderLayout.CENTER);
+                inputGrid[i][j] = input;
             }
         }
         revalidate();

@@ -39,8 +39,13 @@ public class MainGUI {
 
         menuBar.add(howToPlay);
 
-        JPanel contentPane = new JPanel(new FlowLayout(FlowLayout.LEFT,20,0));
+        JPanel contentPane = new JPanel();
+        contentPane.setLayout(new BoxLayout(contentPane, BoxLayout.X_AXIS));
+        contentPane.add(Box.createRigidArea(new Dimension(20,0)));
         contentPane.add(controllerPanel);
+        contentPane.add(Box.createRigidArea(new Dimension(20,0)));
+        contentPane.add(new JSeparator(JSeparator.VERTICAL));
+        contentPane.add(Box.createRigidArea(new Dimension(20,0)));
         contentPane.add(gridPanel);
 
         frame.setTitle("Kenken");

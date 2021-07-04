@@ -1,17 +1,17 @@
 package mvc.model;
 
-import java.util.Collections;
 import java.util.List;
 
 public class GridEvent {
 
     private final Grid source;
-    private final boolean  newGrid;
+    private final boolean newGrid;
     private final boolean squareSelected;
     private final boolean cageCreated;
     private final boolean cageCleared;
-    private final boolean constraintsChecked;
-    private final boolean userInteracted;
+    private final boolean constraintChecked;
+    private final boolean numberInserted;
+    private final boolean solutionRequested;
 
     private final Square selectedSquare;
     private final boolean[][] selectionSnapshot;
@@ -20,8 +20,6 @@ public class GridEvent {
 
     private final List<Square> duplicateSquares;
     private final List<Square> invalidTargetResultSquares;
-
-    public Grid getSource() {return source;}
 
     public boolean isSquareSelected() {
         return squareSelected;
@@ -37,9 +35,15 @@ public class GridEvent {
 
     public boolean isCageCleared() { return cageCleared; }
 
-    public boolean areConstraintsChecked() { return constraintsChecked; }
+    public boolean isConstraintChecked() { return constraintChecked; }
 
-    public boolean didUserInteract() { return userInteracted; }
+    public boolean isNumberInserted() { return numberInserted; }
+
+    public boolean isSolutionRequested() { return solutionRequested; }
+
+
+
+    public Grid getSource() {return source;}
 
     public Square getSelectedSquare() {
         return selectedSquare;
@@ -64,12 +68,13 @@ public class GridEvent {
     public static class Builder {
         private final Grid source;
 
-        private boolean  newGrid = false;
+        private boolean newGrid = false;
         private boolean squareSelected = false;
         private boolean cageCreated = false;
         private boolean cageCleared = false;
-        private boolean constraintsChecked = false;
-        private boolean userInteracted = false;
+        private boolean constraintChecked = false;
+        private boolean numberInserted = false;
+        private boolean solutionRequested = false;
 
         private Square selectedSquare;
         private boolean[][] selectionSnapshot;
@@ -85,8 +90,9 @@ public class GridEvent {
         public Builder squareSelected(boolean b) { squareSelected = b; return this;}
         public Builder cageCreated(boolean b) { cageCreated = b; return this;}
         public Builder cageCleared(boolean b) { cageCleared = b; return this;}
-        public Builder constraintsChecked(boolean b) { constraintsChecked = b; return this;}
-        public Builder userInteracted(boolean b) { userInteracted = b; return this;}
+        public Builder constraintsChecked(boolean b) { constraintChecked = b; return this;}
+        public Builder numberInserted(boolean b) { numberInserted = b; return this;}
+        public Builder solutionRequested(boolean b) { solutionRequested = b; return this;}
 
         public Builder selectedSquare(Square selectedSquare) { this.selectedSquare = selectedSquare; return this; }
         public Builder selectionSnapshot(boolean[][] selectionSnapshot) { this.selectionSnapshot = selectionSnapshot; return this; }
@@ -105,8 +111,8 @@ public class GridEvent {
 
         newGrid = builder.newGrid; squareSelected = builder.squareSelected;
         cageCreated = builder.cageCreated; cageCleared = builder.cageCleared;
-        constraintsChecked = builder.constraintsChecked; userInteracted = builder.userInteracted;
-        duplicateSquares = builder.duplicateSquares;
+        constraintChecked = builder.constraintChecked; numberInserted = builder.numberInserted;
+        solutionRequested = builder.solutionRequested; duplicateSquares = builder.duplicateSquares;
         invalidTargetResultSquares = builder.invalidTargetResultSquares;
         selectedSquare = builder.selectedSquare; selectionSnapshot = builder.selectionSnapshot;
         operation = builder.operation; result = builder.result;

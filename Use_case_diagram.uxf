@@ -4,7 +4,7 @@
   <element>
     <id>UMLActor</id>
     <coordinates>
-      <x>583</x>
+      <x>561</x>
       <y>374</y>
       <w>66</w>
       <h>121</h>
@@ -15,7 +15,7 @@
   <element>
     <id>UMLUseCase</id>
     <coordinates>
-      <x>770</x>
+      <x>748</x>
       <y>187</y>
       <w>209</w>
       <h>132</h>
@@ -32,7 +32,7 @@ già definita</panel_attributes>
   <element>
     <id>UMLUseCase</id>
     <coordinates>
-      <x>781</x>
+      <x>759</x>
       <y>374</y>
       <w>187</w>
       <h>88</h>
@@ -44,7 +44,7 @@ una griglia di gioco</panel_attributes>
   <element>
     <id>Relation</id>
     <coordinates>
-      <x>638</x>
+      <x>616</x>
       <y>396</y>
       <w>165</w>
       <h>44</h>
@@ -55,7 +55,7 @@ una griglia di gioco</panel_attributes>
   <element>
     <id>Relation</id>
     <coordinates>
-      <x>638</x>
+      <x>616</x>
       <y>231</y>
       <w>154</w>
       <h>209</h>
@@ -66,7 +66,7 @@ una griglia di gioco</panel_attributes>
   <element>
     <id>Relation</id>
     <coordinates>
-      <x>858</x>
+      <x>836</x>
       <y>308</y>
       <w>110</w>
       <h>88</h>
@@ -78,8 +78,43 @@ una griglia di gioco</panel_attributes>
   <element>
     <id>UMLUseCase</id>
     <coordinates>
-      <x>781</x>
-      <y>517</y>
+      <x>242</x>
+      <y>374</y>
+      <w>187</w>
+      <h>99</h>
+    </coordinates>
+    <panel_attributes>Inserimento di numeri 
+nella griglia di gioco</panel_attributes>
+    <additional_attributes/>
+  </element>
+  <element>
+    <id>Relation</id>
+    <coordinates>
+      <x>418</x>
+      <y>396</y>
+      <w>165</w>
+      <h>44</h>
+    </coordinates>
+    <panel_attributes/>
+    <additional_attributes>130.0;20.0;10.0;20.0</additional_attributes>
+  </element>
+  <element>
+    <id>UMLUseCase</id>
+    <coordinates>
+      <x>264</x>
+      <y>220</y>
+      <w>187</w>
+      <h>88</h>
+    </coordinates>
+    <panel_attributes>Controllo di validità dei
+numeri inseriti</panel_attributes>
+    <additional_attributes/>
+  </element>
+  <element>
+    <id>UMLUseCase</id>
+    <coordinates>
+      <x>495</x>
+      <y>165</y>
       <w>187</w>
       <h>88</h>
     </coordinates>
@@ -90,12 +125,23 @@ delle soluzioni</panel_attributes>
   <element>
     <id>Relation</id>
     <coordinates>
-      <x>638</x>
-      <y>407</y>
-      <w>165</w>
+      <x>440</x>
+      <y>264</y>
+      <w>143</w>
       <h>176</h>
     </coordinates>
     <panel_attributes/>
-    <additional_attributes>10.0;10.0;130.0;140.0</additional_attributes>
+    <additional_attributes>110.0;140.0;10.0;10.0</additional_attributes>
+  </element>
+  <element>
+    <id>Relation</id>
+    <coordinates>
+      <x>583</x>
+      <y>242</y>
+      <w>33</w>
+      <h>143</h>
+    </coordinates>
+    <panel_attributes/>
+    <additional_attributes>10.0;110.0;10.0;10.0</additional_attributes>
   </element>
 </diagram>

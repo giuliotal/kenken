@@ -2,7 +2,7 @@ package mvc.model;
 
 import java.util.*;
 
-// TODO singleton? Avrebbe senso in quanto voglio che ci sia una sola griglia su schermo, quindi mi basta una sola istsanza
+// TODO singleton? Avrebbe senso in quanto voglio che ci sia una sola griglia su schermo, quindi mi basta una sola istanza
 // (MODEL)
 public class Grid extends AbstractGrid {
 
@@ -11,8 +11,12 @@ public class Grid extends AbstractGrid {
     private boolean[][] selectedSquares;
     private int lockedSquares;
 
+    // memorizzo le soluzioni per poterle visualizzare individualmente
+    private final ArrayList<int[][]> solutions = new ArrayList<>();
+    private int[][] currentSolution;
+
     // Ogni blocco viene costruito dinamicamente e memorizzato nella lista
-    private final LinkedList<Cage> cageSchema = new LinkedList<>();
+    private final List<Cage> cageSchema = new LinkedList<>();
 
     // Inizializzazione di una griglia vuota
     public Grid() {
@@ -29,9 +33,7 @@ public class Grid extends AbstractGrid {
 
     public int getSize() { return n; }
 
-    public List<Cage> getCageSchema() {
-        return Collections.unmodifiableList(cageSchema);
-    }
+    public int[][] getCurrentSolution() { return currentSolution; }
 
     public boolean[][] getSelectedSquares() {
         return selectedSquares;
@@ -45,14 +47,14 @@ public class Grid extends AbstractGrid {
         this.grid = new int[n][n];
         this.selectedSquares = new boolean[n][n];
         cageSchema.clear();
+        solutions.clear();
         lockedSquares = 0;
         notifyListeners(new GridEvent.Builder(this).newGrid(true).build());
     }
 
     public void insertNumber(int number, int row, int column) {
         grid[row][column] = number;
-        System.out.println(Arrays.deepToString(grid));
-        notifyListeners(new GridEvent.Builder(this).userInteracted(true).build());
+        notifyListeners(new GridEvent.Builder(this).numberInserted(true).build());
     }
 
     public void deleteNumber(int row, int column) {
@@ -120,6 +122,39 @@ public class Grid extends AbstractGrid {
             invalidTargetResult.add(targetResultSquare);
         }
         notifyListeners(new GridEvent.Builder(this).constraintsChecked(true).duplicateSquares(duplicateSquares).invalidTargetResultSquares(invalidTargetResult).build());
+    }
+
+    public void findSolutions(int maxSolutions) {
+        if(solutions.isEmpty()) new KenkenSolutions().risolvi(maxSolutions);
+        if(solutions.size() > 0) currentSolution = solutions.get(0);
+        else currentSolution = null;
+        notifyListeners(new GridEvent.Builder(this).solutionRequested(true).build());
+    }
+
+    public void nextSolution() {
+        int i = solutions.indexOf(currentSolution);
+        if(hasNextSolution()) {
+            currentSolution = solutions.get(i + 1);
+            notifyListeners(new GridEvent.Builder(this).solutionRequested(true).build());
+        }
+    }
+
+    public boolean hasNextSolution() {
+        int i = solutions.indexOf(currentSolution);
+        return i + 1 <= solutions.size()-1;
+    }
+
+    public void previousSolution() {
+        int i = solutions.indexOf(currentSolution);
+        if(hasPreviousSolution()) {
+            currentSolution = solutions.get(i - 1);
+            notifyListeners(new GridEvent.Builder(this).solutionRequested(true).build());
+        }
+    }
+
+    public boolean hasPreviousSolution() {
+        int i = solutions.indexOf(currentSolution);
+        return i - 1 >= 0;
     }
 
     public void selectSquare(int i, int j) {
@@ -228,6 +263,8 @@ public class Grid extends AbstractGrid {
         public boolean checkTargetResult() {
            for(Square s : squares) {
                if(grid[s.getRow()][s.getColumn()] == 0) //vuol dire che il blocco non è stato riempito completamente
+                   // restituisco true perché se il blocco non è completo non ho informazioni a sufficienza per dire che il vincolo non è rispettato
+                   // per cui posso dire che il blocco è ottimisticamente corretto
                    return true;
            }
            return checkTargetResult(0);
@@ -259,7 +296,8 @@ public class Grid extends AbstractGrid {
                 return res == result;
             }
             else {
-                for(int j = i; j< squares.length; j++){
+                // continua a permutare solo se non si è ottenuto il target result
+                for(int j = i; j < squares.length && !verified; j++){
                     swap(squares,i,j);
                     verified = checkTargetResult(i+1);
                     swap(squares,i,j);
@@ -272,6 +310,113 @@ public class Grid extends AbstractGrid {
             return Arrays.deepToString(squares);
         }
 
+    }
+
+    class KenkenSolutions implements Backtracking<Square, Integer> {
+
+        @Override
+        public Square primoPuntoDiScelta() {
+            return new Square(0,0);
+        }
+
+        @Override
+        public Square prossimoPuntoDiScelta(Square ps) {
+            int row = ps.getRow();
+            int column = ps.getColumn();
+            if(column < n-1) column++;
+            else if(column == n-1) {
+                row++;
+                column = 0;
+            }
+            return new Square(row,column);
+        }
+
+        @Override
+        public Square ultimoPuntoDiScelta() {
+            return new Square(n-1,n-1);
+        }
+
+        @Override
+        public Integer primaScelta(Square ps) {
+            return 1;
+        }
+
+        @Override
+        public Integer prossimaScelta(Integer integer) {
+            return integer+1;
+        }
+
+        @Override
+        public Integer ultimaScelta(Square ps) {
+            return n;
+        }
+
+        @Override
+        public boolean assegnabile(Integer scelta, Square puntoDiScelta) {
+            int i = puntoDiScelta.getRow();
+            int j = puntoDiScelta.getColumn();
+            int tmp = grid[i][j]; // memorizzo la scelta corrente
+            grid[i][j] = scelta; // assegno temporaneamente la nuova scelta per vedere se rispetta i vincoli
+            boolean vincoliOk = true;
+            List<Square> duplicateSquares = findDuplicates();
+            if(!duplicateSquares.isEmpty()) vincoliOk = false;
+            if(vincoliOk) {
+                List<Cage> invalidTargetResult = findIncorrectCages(); // TODO ad ogni assegnamento verifico tutti i blocchi: TROPPO COSTOSO
+                if (!invalidTargetResult.isEmpty()) vincoliOk = false;
+            }
+            if(!vincoliOk) {
+                grid[i][j] = tmp; // ripristino la vecchia griglia
+                return false;
+            }
+            return true;
+        }
+
+        @Override
+        public void assegna(Integer scelta, Square puntoDiScelta) {
+            int i = puntoDiScelta.getRow();
+            int j = puntoDiScelta.getColumn();
+            grid[i][j] = scelta;
+        }
+
+        @Override
+        public void deassegna(Integer scelta, Square puntoDiScelta) {
+            int i = puntoDiScelta.getRow();
+            int j = puntoDiScelta.getColumn();
+            grid[i][j] = 0;
+        }
+
+        @Override
+        public Square precedentePuntoDiScelta(Square puntoDiScelta) {
+            int row = puntoDiScelta.getRow();
+            int column = puntoDiScelta.getColumn();
+            if(column > 0) column--;
+            else if(column == 0) {
+                row--;
+                column = n-1;
+            }
+            return new Square(row,column);
+        }
+
+        @Override
+        public Integer ultimaSceltaAssegnataA(Square puntoDiScelta) {
+            int row = puntoDiScelta.getRow();
+            int column = puntoDiScelta.getColumn();
+            return grid[row][column];
+        }
+
+        @Override
+        public void scriviSoluzione(int nr_sol) {
+            System.out.println("Soluzione n° " + nr_sol);
+            System.out.println(Arrays.deepToString(grid));
+
+            int[][] gridCopy = new int[n][n];
+            for (int i = 0; i < n; i++) {
+                for (int j = 0; j < n; j++) {
+                    gridCopy[i][j] = grid[i][j];
+                }
+            }
+            solutions.add(gridCopy);
+        }
     }
 
 }

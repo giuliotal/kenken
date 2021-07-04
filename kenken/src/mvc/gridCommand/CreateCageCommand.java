@@ -19,6 +19,7 @@ public class CreateCageCommand implements Command {
 
     @Override
     public boolean doIt() {
+        //TODO tutti i valori di input devono essere richiesti con appositi metodi nella view e non nel controller
         JFrame topFrame = (JFrame) SwingUtilities.getWindowAncestor(gridPanel);
 
         if(grid.isSelectionEmpty()) {

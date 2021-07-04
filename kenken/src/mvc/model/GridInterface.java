@@ -33,4 +33,16 @@ public interface GridInterface {
     List<Grid.Cage> findIncorrectCages();
 
     void checkConstraints();
+
+    void findSolutions(int maxSolutions);
+
+    int[][] getCurrentSolution();
+
+    void nextSolution();
+
+    void previousSolution();
+
+    boolean hasNextSolution();
+
+    boolean hasPreviousSolution();
 }

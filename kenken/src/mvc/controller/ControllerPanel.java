@@ -9,6 +9,7 @@ import mvc.view.GridPanel;
 
 import javax.swing.*;
 import java.awt.*;
+import java.util.List;
 
 public class ControllerPanel extends JPanel implements GridListener {
 
@@ -32,15 +33,17 @@ public class ControllerPanel extends JPanel implements GridListener {
     private final JButton clearGridButton;
     private final JButton showSolutionsButton;
 
+    private final JPanel solutionNavigationCommands;
+    private final JButton previousSolutionButton;
+    private final JButton nextSolutionButton;
+
     public ControllerPanel(GridInterface grid, CommandHandler commandHandler, GridPanel gridPanel) {
         this.subject = grid;
         this.gridPanel = gridPanel;
         this.commandHandler = commandHandler;
         grid.addGridListener(this);
 
-//        this.setLayout(new GridLayout(3,1, 0, 10));
         this.setLayout(new BoxLayout(this,BoxLayout.Y_AXIS));
-//        this.setBorder(BorderFactory.createLineBorder(Color.DARK_GRAY,2));
 
         controlCommands = new JPanel(new GridLayout(3,1,0,10));
 
@@ -75,7 +78,7 @@ public class ControllerPanel extends JPanel implements GridListener {
 
         // ------------------------------------------------
 
-        gameCommands = new JPanel(new GridLayout(3,1,0,10));
+        gameCommands = new JPanel(new GridLayout(4,1,0,10));
 
         checkConstraintsButton = new JButton(new CheckConstraintsAction(grid, commandHandler)); //checkConstraintsAction
         checkConstraintsButton.setText("Check constraints");
@@ -85,16 +88,31 @@ public class ControllerPanel extends JPanel implements GridListener {
         clearGridButton.setText("Clear grid");
         clearGridButton.setEnabled(false);
 
-        showSolutionsButton = new JButton("Show solutions");
+        showSolutionsButton = new JButton(new ShowSolutionsAction(grid, gridPanel, commandHandler));
+        showSolutionsButton.setText("Show solutions");
         showSolutionsButton.setEnabled(false);
+
+        solutionNavigationCommands = new JPanel(new GridLayout(1,2,0,10));
+        previousSolutionButton = new JButton(new NavigateSolutionsAction(grid,commandHandler,-1));
+        previousSolutionButton.setText("Previous");
+        previousSolutionButton.setEnabled(false);
+        solutionNavigationCommands.add(previousSolutionButton);
+
+        nextSolutionButton = new JButton(new NavigateSolutionsAction(grid,commandHandler,1));
+        nextSolutionButton.setText("Next");
+        nextSolutionButton.setEnabled(false);
+        solutionNavigationCommands.add(nextSolutionButton);
 
         gameCommands.add(checkConstraintsButton);
         gameCommands.add(clearGridButton);
         gameCommands.add(showSolutionsButton);
+        gameCommands.add(solutionNavigationCommands);
 
-        add(controlCommands);
         add(Box.createRigidArea(new Dimension(0,20)));
+        add(controlCommands);
+        add(Box.createRigidArea(new Dimension(0,10)));
         add(gameCommands);
+        add(Box.createRigidArea(new Dimension(0,20)));
 
     }
 
@@ -103,15 +121,15 @@ public class ControllerPanel extends JPanel implements GridListener {
         createCageButton.setEnabled(true);
     }
 
-    public JButton getCreateCageButton() {
-        return createCageButton;
-    }
-
     public void setStartGameButtonEnabled(boolean b) {
         startGameButton.setEnabled(b);
     }
 
+    public void setCheckConstraintsButton(boolean b) { checkConstraintsButton.setEnabled(b);}
+
     public void setClearGridButton(boolean b) { clearGridButton.setEnabled(b); }
+
+    public void setShowSolutionsButton(boolean b) { showSolutionsButton.setEnabled(b);}
 
     @Override
     public void gridChanged(GridEvent e) {
@@ -123,10 +141,11 @@ public class ControllerPanel extends JPanel implements GridListener {
             if(lockedSquares == n*n){
                 startGameButton.setEnabled(true);
                 createCageButton.setEnabled(false);
-                checkConstraintsButton.setEnabled(true);
-                clearGridButton.setEnabled(true);
-                showSolutionsButton.setEnabled(true);
             }
+        }
+        if(e.isSolutionRequested()) {
+            previousSolutionButton.setEnabled(e.getSource().hasPreviousSolution());
+            nextSolutionButton.setEnabled(e.getSource().hasNextSolution());
         }
         repaint();
         revalidate();
