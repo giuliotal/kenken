@@ -1,6 +1,8 @@
 package mvc.model;
 
-public class Square {
+import java.io.Serializable;
+
+public class Square implements Serializable {
     private final int row;
     private final int column;
 

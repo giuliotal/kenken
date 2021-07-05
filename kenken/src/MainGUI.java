@@ -4,6 +4,8 @@ import mvc.model.Grid;
 import mvc.model.GridInterface;
 import mvc.view.CreateGridAction;
 import mvc.view.GridPanel;
+import mvc.view.LoadGameAction;
+import mvc.view.SaveGameAction;
 
 import javax.swing.*;
 import java.awt.*;
@@ -31,6 +33,16 @@ public class MainGUI {
         }
         menuBar.add(newGame);
 
+        JMenu saveOrLoad = new JMenu("Save/load");
+        JMenuItem saveGame = new JMenuItem(new SaveGameAction(grid, gridPanel, handler));
+        saveGame.setText("Save game");
+        JMenuItem loadGame = new JMenuItem(new LoadGameAction(grid, gridPanel, controllerPanel, handler));
+        loadGame.setText("Load game");
+        saveOrLoad.add(saveGame);
+        saveOrLoad.add(loadGame);
+
+        menuBar.add(saveOrLoad);
+
         JMenu howToPlay = new JMenu("How to play");
         JMenuItem rules = new JMenuItem("KenKen rules");
         JMenuItem help = new JMenuItem("Help");
@@ -47,6 +59,7 @@ public class MainGUI {
         contentPane.add(new JSeparator(JSeparator.VERTICAL));
         contentPane.add(Box.createRigidArea(new Dimension(20,0)));
         contentPane.add(gridPanel);
+        contentPane.add(Box.createRigidArea(new Dimension(20,0)));
 
         frame.setTitle("Kenken");
         frame.setJMenuBar(menuBar);

@@ -121,7 +121,9 @@ public class ControllerPanel extends JPanel implements GridListener {
         createCageButton.setEnabled(true);
     }
 
-    public void setStartGameButtonEnabled(boolean b) {
+    public void setCreateCageButton(boolean b) { createCageButton.setEnabled(b); }
+
+    public void setStartGameButton(boolean b) {
         startGameButton.setEnabled(b);
     }
 

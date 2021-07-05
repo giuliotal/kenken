@@ -17,7 +17,7 @@ public class StartGameCommand implements Command {
     @Override
     public boolean doIt() {
         gridPanel.startGameView();
-        controllerPanel.setStartGameButtonEnabled(false);
+        controllerPanel.setStartGameButton(false);
         controllerPanel.setCheckConstraintsButton(true);
         controllerPanel.setClearGridButton(true);
         controllerPanel.setShowSolutionsButton(true);

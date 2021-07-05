@@ -45,4 +45,8 @@ public interface GridInterface {
     boolean hasNextSolution();
 
     boolean hasPreviousSolution();
+
+    boolean save(String pathName);
+
+    boolean load(String pathName);
 }

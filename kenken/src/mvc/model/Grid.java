@@ -1,10 +1,12 @@
 package mvc.model;
 
+import javax.swing.*;
+import java.io.*;
 import java.util.*;
 
 // TODO singleton? Avrebbe senso in quanto voglio che ci sia una sola griglia su schermo, quindi mi basta una sola istanza
 // (MODEL)
-public class Grid extends AbstractGrid {
+public class Grid extends AbstractGrid implements Serializable {
 
     private int n;
     private int[][] grid;
@@ -16,7 +18,7 @@ public class Grid extends AbstractGrid {
     private int[][] currentSolution;
 
     // Ogni blocco viene costruito dinamicamente e memorizzato nella lista
-    private final List<Cage> cageSchema = new LinkedList<>();
+    private List<Cage> cageSchema = new LinkedList<>();
 
     // Inizializzazione di una griglia vuota
     public Grid() {
@@ -32,6 +34,10 @@ public class Grid extends AbstractGrid {
     }
 
     public int getSize() { return n; }
+
+    public List<Cage> getCageSchema() {
+        return cageSchema;
+    }
 
     public int[][] getCurrentSolution() { return currentSolution; }
 
@@ -157,6 +163,38 @@ public class Grid extends AbstractGrid {
         return i - 1 >= 0;
     }
 
+    public boolean save(String pathName) {
+        if(!pathName.contains(".kenken")) return false;
+        try {
+            ObjectOutputStream oos = new ObjectOutputStream(new FileOutputStream(pathName));
+            oos.writeObject(grid);
+            oos.writeObject(cageSchema);
+            oos.close();
+        }catch(IOException e) {
+            e.printStackTrace();
+            return false;
+        }
+        return true;
+    }
+
+    public boolean load(String pathName) {
+        if(!pathName.contains(".kenken")) return false;
+        try {
+            ObjectInputStream ois = new ObjectInputStream(new FileInputStream(pathName));
+            int[][] savedGrid = (int[][]) ois.readObject();
+            setSize(savedGrid.length);
+            grid = savedGrid;
+            cageSchema = (List<Cage>) ois.readObject();
+            ois.close();
+            notifyListeners(new GridEvent.Builder(this).gridLoadedFromDisk(true).build());
+        }catch(IOException | ClassNotFoundException e) {
+            e.printStackTrace();
+            return false;
+        }
+        return true;
+    }
+
+    //TODO da spostare nella view: la selezione delle celle non è responsabilità del model
     public void selectSquare(int i, int j) {
         selectedSquares[i][j] = !selectedSquares[i][j];
         notifyListeners(new GridEvent.Builder(this).squareSelected(true).selectedSquare(new Square(i,j)).build());
@@ -230,7 +268,7 @@ public class Grid extends AbstractGrid {
         return remaining;
     }
 
-    class Cage {
+    public class Cage implements Serializable {
 
         // ogni blocco tiene dei riferimenti alle celle della griglia di gioco che lo costituiscono (memorizzandone gli indici):
         // in questo modo le celle variano con backtracking sulla griglia, e automaticamente si aggiornano negli oggetti blocco.

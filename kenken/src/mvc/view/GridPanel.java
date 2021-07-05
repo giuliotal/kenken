@@ -2,19 +2,18 @@ package mvc.view;
 
 import command.CommandHandler;
 import mvc.gridCommand.InsertNumberCommand;
-import mvc.model.GridEvent;
-import mvc.model.GridInterface;
-import mvc.model.GridListener;
-import mvc.model.Square;
+import mvc.model.*;
 
 import javax.swing.*;
 import javax.swing.event.DocumentEvent;
 import javax.swing.event.DocumentListener;
+import javax.swing.filechooser.FileNameExtensionFilter;
 import javax.swing.plaf.metal.MetalButtonUI;
 import javax.swing.text.AbstractDocument;
 import javax.swing.text.BadLocationException;
 import javax.swing.text.DocumentFilter;
 import java.awt.*;
+import java.io.File;
 import java.util.List;
 
 // Concrete Observer (VIEW)
@@ -157,6 +156,59 @@ public class GridPanel extends JPanel implements GridListener {
                         "Unsolvable game",JOptionPane.ERROR_MESSAGE);
             }
         }
+        if(e.isGridLoadedFromDisk()) {
+            List<Grid.Cage> cageSchema = e.getSource().getCageSchema();
+            for(Grid.Cage c : cageSchema) {
+                boolean[][] cage = new boolean[n][n];
+                for(Square s : c.getSquares()){
+                    int i = s.getRow(); int j = s.getColumn();
+                    cage[i][j] = true;
+                }
+                int minRow = Integer.MAX_VALUE;
+                int minCol = Integer.MAX_VALUE;
+                for (int i = 0; i < n; i++) {
+                    for (int j = 0; j < n; j++) {
+                        if(cage[i][j]){
+                            JButton button = buttonGrid[i][j];
+                            button.setBackground(Color.WHITE);
+                            button.setEnabled(false);
+                            int top, left, bottom, right;
+                            top = left = bottom = right = 4;
+                            if(i > 0 && cage[i-1][j]) top = 1;
+                            if(i < cage.length-1 && cage[i+1][j]) bottom = 1;
+                            if(j > 0 && cage[i][j-1]) left = 1;
+                            if(j < cage.length-1 && cage[i][j+1]) right = 1;
+                            button.setBorder(BorderFactory.createMatteBorder(top, left, bottom, right, Color.BLACK));
+
+                            // individuo la cella più in alto a sinistra del blocco, dove inserire il risultato
+                            // da ottenere combinando le cifre del blocco
+                            if(i < minRow && j < minCol){
+                                minRow = i;
+                                minCol = j;
+                            }
+                        }
+                    }
+                }
+                String operation = null;
+                switch(c.getOperation()) {
+                    case SUM: operation = "+"; break;
+                    case SUBTRACTION: operation = "-"; break;
+                    case MULTIPLICATION: operation = "*"; break;
+                    case DIVISION: operation = "/"; break;
+                }
+                JButton targetResultButton = buttonGrid[minRow][minCol];
+                targetResultButton.setText(c.getResult()+operation);
+                targetResultButton.setFont(targetResultButton.getFont().deriveFont(Font.BOLD, 20));
+                targetResultButton.setHorizontalAlignment(SwingConstants.LEFT);
+                targetResultButton.setVerticalAlignment(SwingConstants.NORTH);
+                targetResultButton.setUI(new MetalButtonUI() {
+                    protected Color getDisabledTextColor() {
+                        return Color.BLACK;
+                    }
+                });
+            }
+            startGameView();
+        }
         repaint();
         revalidate();
     }
@@ -214,6 +266,24 @@ public class GridPanel extends JPanel implements GridListener {
             }
         }
         revalidate();
+    }
+
+    public String getFilePath() {
+        JFileChooser chooser = new JFileChooser();
+        chooser.setSelectedFile(new File("myGame.kenken"));
+        chooser.setFileFilter(new FileNameExtensionFilter(".kenken files","kenken"));
+        if(chooser.showDialog(this, "Select") == JFileChooser.APPROVE_OPTION) {
+            String filePath = chooser.getSelectedFile().getAbsolutePath();
+            if (!filePath .endsWith(".kenken"))
+                filePath += ".kenken";
+                return filePath;
+        }
+        return null;
+    }
+
+    public void showIOErrorDialog() {
+        JFrame topFrame = (JFrame) SwingUtilities.getWindowAncestor(this);
+        JOptionPane.showMessageDialog(topFrame,"The file selected may be damaged or incompatible", "An error occurred trying to load the game",JOptionPane.ERROR_MESSAGE);
     }
 
     class InputFilter extends DocumentFilter {
