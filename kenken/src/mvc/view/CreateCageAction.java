@@ -2,6 +2,7 @@ package mvc.view;
 
 import command.CommandHandler;
 import mvc.gridCommand.CreateCageCommand;
+import mvc.model.Grid;
 import mvc.model.GridInterface;
 
 import javax.swing.*;
@@ -21,6 +22,15 @@ public class CreateCageAction extends AbstractAction {
 
     @Override
     public void actionPerformed(ActionEvent actionEvent) {
-        commandHandler.handle(new CreateCageCommand(grid, gridPanel));
+        if(!gridPanel.checkSelection()) return;
+
+        boolean[][] selectedSquares = gridPanel.getSelectedSquares();
+
+        int result = gridPanel.getTargetResult();
+        if(result == -1) return;
+
+        Grid.MathOperation operation = gridPanel.getOperation();
+        if(operation == null) return;
+        commandHandler.handle(new CreateCageCommand(grid, selectedSquares, result, operation));
     }
 }

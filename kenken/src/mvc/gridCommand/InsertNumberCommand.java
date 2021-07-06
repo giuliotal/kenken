@@ -20,12 +20,12 @@ public class InsertNumberCommand implements Command {
     @Override
     public boolean doIt() {
         grid.insertNumber(number, row, column);
-        return true;
+        return false;
     }
 
     @Override
     public boolean undoIt() {
         grid.deleteNumber(row,column);
-        return true;
+        return false;
     }
 }

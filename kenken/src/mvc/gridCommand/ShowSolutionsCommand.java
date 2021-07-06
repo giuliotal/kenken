@@ -2,43 +2,29 @@ package mvc.gridCommand;
 
 import command.Command;
 import mvc.model.GridInterface;
-import mvc.view.GridPanel;
-
-import javax.swing.*;
+import mvc.model.Memento;
 
 public class ShowSolutionsCommand implements Command {
 
     private final GridInterface grid;
-    private final GridPanel gridPanel;
+    private final int maxSolutions;
+    private final Memento gridMemento;
 
-    public ShowSolutionsCommand(GridInterface grid, GridPanel gridPanel) {
+    public ShowSolutionsCommand(GridInterface grid, int maxSolutions) {
         this.grid = grid;
-        this.gridPanel = gridPanel;
+        this.maxSolutions = maxSolutions;
+        this.gridMemento = grid.getMemento();
     }
 
     @Override
     public boolean doIt() {
-        //TODO richiesta del numero di soluzioni da spostare nella view
-        JFrame topFrame = (JFrame) SwingUtilities.getWindowAncestor(gridPanel);
-        int maxSolutions = 0;
-        boolean validInput = false;
-        do {
-            String input = JOptionPane.showInputDialog(topFrame, "Enter a maximum value of solutions to display:");
-            if (input == null)
-                return false;
-            try {
-                maxSolutions = Integer.parseInt(input);
-                validInput = true;
-            } catch (NumberFormatException e) {
-                JOptionPane.showMessageDialog(topFrame, "Please insert an integer value.", "Invalid input", JOptionPane.ERROR_MESSAGE);
-            }
-            grid.findSolutions(maxSolutions);
-        }while(!validInput);
+        grid.findSolutions(maxSolutions);
         return true;
     }
 
     @Override
     public boolean undoIt() {
-        return false;
+        grid.setMemento(gridMemento);
+        return true;
     }
 }

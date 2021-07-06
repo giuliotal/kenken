@@ -1,18 +1,15 @@
 package mvc.model;
 
-import java.util.List;
-
 public interface GridInterface {
 
     void addGridListener(GridListener l);
 
     void removeGridListener(GridListener l);
 
-    boolean verifyAdjacency();
+    boolean verifyAdjacency(boolean[][] selectedSquares);
 
-    boolean isSelectionEmpty();
-
-    void createCage(int result, MathOperation op);
+    //TODO da sistemare: un metodo nell'interfaccia non può dipendere dalla classe concreta!
+    boolean createCage(boolean[][] squares, int result, Grid.MathOperation op);
 
     void insertNumber(int number, int row, int column);
 
@@ -24,15 +21,7 @@ public interface GridInterface {
 
     int getSize();
 
-    boolean[][] getSelectedSquares();
-
-    void selectSquare(int i, int j);
-
-    List<Square> findDuplicates();
-
-    List<Grid.Cage> findIncorrectCages();
-
-    void checkConstraints();
+    boolean checkConstraints();
 
     void findSolutions(int maxSolutions);
 
@@ -49,4 +38,8 @@ public interface GridInterface {
     boolean save(String pathName);
 
     boolean load(String pathName);
+
+    Memento getMemento();
+
+    void setMemento(Memento m);
 }

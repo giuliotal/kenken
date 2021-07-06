@@ -1,95 +1,103 @@
 package mvc.model;
 
-import javax.swing.*;
 import java.io.*;
 import java.util.*;
 
-// TODO singleton? Avrebbe senso in quanto voglio che ci sia una sola griglia su schermo, quindi mi basta una sola istanza
 // (MODEL)
 public class Grid extends AbstractGrid implements Serializable {
 
+    private static final long serialVersionUID = 2581289391319703541L;
+
     private int n;
-    private int[][] grid;
-    private boolean[][] selectedSquares;
-    private int lockedSquares;
+    private Square[][] squares;
 
     // memorizzo le soluzioni per poterle visualizzare individualmente
     private final ArrayList<int[][]> solutions = new ArrayList<>();
     private int[][] currentSolution;
 
     // Ogni blocco viene costruito dinamicamente e memorizzato nella lista
-    private List<Cage> cageSchema = new LinkedList<>();
+    private LinkedList<Cage> cageSchema = new LinkedList<>();
+
+    private List<Square> duplicateSquares;
+
+    public List<Square> getDuplicateSquares() {
+        return duplicateSquares;
+    }
+
+    private List<Cage> invalidTargetResultCages;
+
+    public List<Cage> getInvalidTargetResultCages() {
+        return invalidTargetResultCages;
+    }
+
 
     // Inizializzazione di una griglia vuota
-    public Grid() {
-        this.n = 0;
-        this.grid = new int[0][0];
-        this.selectedSquares = new boolean[0][0];
-    }
-    
-    // Inizializzazione manuale della griglia
-    public Grid(int n, int[][] griglia) {
-        this.n = n;
-        this.grid = griglia;
-    }
+    public Grid() {}
 
     public int getSize() { return n; }
 
-    public List<Cage> getCageSchema() {
+    public int[][] getGrid() {
+        int[][] ret = new int[n][n];
+        for (int i = 0; i < n; i++) {
+            for (int j = 0; j < n; j++) {
+                ret[i][j] = squares[i][j].value;
+            }
+        }
+        return ret;
+    }
+
+    public LinkedList<Cage> getCageSchema() {
         return cageSchema;
     }
 
     public int[][] getCurrentSolution() { return currentSolution; }
 
-    public boolean[][] getSelectedSquares() {
-        return selectedSquares;
-    }
-
-    public int getLockedSquares() { return lockedSquares; }
-
     // cambiare la dimensione significa creare una nuova griglia
     public void setSize(int n) {
         this.n = n;
-        this.grid = new int[n][n];
-        this.selectedSquares = new boolean[n][n];
+        this.squares = new Square[n][n];
+        for (int i = 0; i < n; i++) {
+            for (int j = 0; j < n; j++) {
+                squares[i][j] = new Square(i,j,0);
+            }
+        }
         cageSchema.clear();
         solutions.clear();
-        lockedSquares = 0;
         notifyListeners(new GridEvent.Builder(this).newGrid(true).build());
     }
 
     public void insertNumber(int number, int row, int column) {
-        grid[row][column] = number;
+        squares[row][column].value = number;
         notifyListeners(new GridEvent.Builder(this).numberInserted(true).build());
     }
 
     public void deleteNumber(int row, int column) {
-        grid[row][column] = 0;
-//        notifyListeners(new GridEvent.Builder(this).build());
+        squares[row][column].value = 0;
+        notifyListeners(new GridEvent.Builder(this).numberDeleted(true).build());
     }
 
     public void clear() {
         for (int i = 0; i < n; i++) {
             for (int j = 0; j < n; j++) {
-                grid[i][j] = 0;
+                squares[i][j].value = 0;
             }
         }
         notifyListeners(new GridEvent.Builder(this).cageCleared(true).build());
     }
 
     // TODO O(n^3): da rivedere
-    public List<Square> findDuplicates() {
+    private List<Square> findDuplicates() {
         Set<Square> duplicateSquares = new HashSet<>();
         for (int row = 0; row < n; row++) {
             for (int column = 0; column < n; column++) {
-                int val = grid[row][column];
+                int val = squares[row][column].value;
                 // verifico i duplicati soltanto per i numeri inseriti dall'utente (che sono diversi da 0)
                 for(int k = 0; k < n && val != 0; k++){
-                    if(grid[row][k]==val && k!=column){
+                    if(squares[row][k].value==val && k!=column){
                         duplicateSquares.add(new Square(row, column));
                         duplicateSquares.add(new Square(row, k));
                     }
-                    else if (grid[k][column]==val && k!=row){
+                    else if (squares[k][column].value==val && k!=row){
                         duplicateSquares.add(new Square(row, column));
                         duplicateSquares.add(new Square(k, column));
                     }
@@ -99,7 +107,7 @@ public class Grid extends AbstractGrid implements Serializable {
         return new LinkedList<>(duplicateSquares);
     }
 
-    public List<Cage> findIncorrectCages() {
+    private List<Cage> findIncorrectCages() {
         List<Cage> incorrectCages = new LinkedList<>();
         for(Cage b : cageSchema) {
             if(!b.checkTargetResult())
@@ -108,26 +116,16 @@ public class Grid extends AbstractGrid implements Serializable {
         return incorrectCages;
     }
 
-    public void checkConstraints() {
+    public boolean checkConstraints() {
         List<Square> duplicateSquares = findDuplicates();
-        List<Square> invalidTargetResult = new LinkedList<>();
-        // individuo soltanto le celle contententi il target result non soddisfatto e rendo quest'ultimo rosso, non l'intero blocco
-        for(Cage c : findIncorrectCages()){
-            int minRow = Integer.MAX_VALUE;
-            int minCol = Integer.MAX_VALUE;
-            Square targetResultSquare = null;
-            for(Square s : c.getSquares()) {
-                int i = s.getRow();
-                int j = s.getColumn();
-                if(i < minRow && j < minCol) {
-                    minRow = i;
-                    minCol = j;
-                    targetResultSquare = s;
-                }
-            }
-            invalidTargetResult.add(targetResultSquare);
-        }
-        notifyListeners(new GridEvent.Builder(this).constraintsChecked(true).duplicateSquares(duplicateSquares).invalidTargetResultSquares(invalidTargetResult).build());
+        List<Cage> invalidTargetResultCages = findIncorrectCages();
+
+        if(duplicateSquares.isEmpty() && invalidTargetResultCages.isEmpty()) return true;
+
+        this.duplicateSquares = duplicateSquares;
+        this.invalidTargetResultCages = invalidTargetResultCages;
+        notifyListeners(new GridEvent.Builder(this).constraintsChecked(true).build());
+        return false;
     }
 
     public void findSolutions(int maxSolutions) {
@@ -167,7 +165,7 @@ public class Grid extends AbstractGrid implements Serializable {
         if(!pathName.contains(".kenken")) return false;
         try {
             ObjectOutputStream oos = new ObjectOutputStream(new FileOutputStream(pathName));
-            oos.writeObject(grid);
+            oos.writeObject(squares);
             oos.writeObject(cageSchema);
             oos.close();
         }catch(IOException e) {
@@ -181,12 +179,12 @@ public class Grid extends AbstractGrid implements Serializable {
         if(!pathName.contains(".kenken")) return false;
         try {
             ObjectInputStream ois = new ObjectInputStream(new FileInputStream(pathName));
-            int[][] savedGrid = (int[][]) ois.readObject();
+            Square[][] savedGrid = (Square[][]) ois.readObject();
             setSize(savedGrid.length);
-            grid = savedGrid;
-            cageSchema = (List<Cage>) ois.readObject();
+            squares = savedGrid;
+            cageSchema = (LinkedList<Cage>) ois.readObject();
             ois.close();
-            notifyListeners(new GridEvent.Builder(this).gridLoadedFromDisk(true).build());
+            notifyListeners(new GridEvent.Builder(this).newGrid(true).build());
         }catch(IOException | ClassNotFoundException e) {
             e.printStackTrace();
             return false;
@@ -194,39 +192,42 @@ public class Grid extends AbstractGrid implements Serializable {
         return true;
     }
 
-    //TODO da spostare nella view: la selezione delle celle non è responsabilità del model
-    public void selectSquare(int i, int j) {
-        selectedSquares[i][j] = !selectedSquares[i][j];
-        notifyListeners(new GridEvent.Builder(this).squareSelected(true).selectedSquare(new Square(i,j)).build());
+    @Override
+    public Memento getMemento() {
+        return new GridMemento();
     }
 
-    public void createCage(int result, MathOperation op) {
+    @Override
+    public void setMemento(Memento m) {
+        if(!(m instanceof GridMemento))
+            throw new IllegalArgumentException();
+        GridMemento memento = (GridMemento) m;
+        if(this != memento.getOriginator())
+            throw new IllegalArgumentException();
+        setSize(memento.squares.length);
+        squares = memento.squares.clone();
+        cageSchema = (LinkedList<Cage>) memento.cageSchema.clone();
+        notifyListeners(new GridEvent.Builder(this).newGrid(true).build());
+    }
+
+    public boolean createCage(boolean[][] selectedSquares, int result, MathOperation op) {
+        if(!verifyAdjacency(selectedSquares)) return false;
         LinkedList<Square> cage = new LinkedList<>();
-        boolean[][] selectionSnapshot = new boolean[n][n];
         for (int i = 0; i < n; i++) {
             for (int j = 0; j < n; j++) {
                 if(selectedSquares[i][j]) {
-                    cage.add(new Square(i, j));
-                    selectionSnapshot[i][j] = true;
-                    lockedSquares++;
+                    cage.add(squares[i][j]);
                 }
             }
         }
         Cage c = new Cage(cage.toArray(new Square[cage.size()]), result, op);
         cageSchema.add(c);
-        notifyListeners(new GridEvent.Builder(this).cageCreated(true).selectionSnapshot(selectionSnapshot).operation(op).result(result).build());
-        selectedSquares = new boolean[n][n]; //azzera la selezione corrente
-    }
-
-    public boolean isSelectionEmpty() {
-        for (int i = 0; i < n; i++)
-            for (int j = 0; j < n; j++)
-                if (selectedSquares[i][j])
-                    return false;
+        notifyListeners(new GridEvent.Builder(this).cageCreated(true).build());
         return true;
     }
 
-    public boolean verifyAdjacency() {
+    public boolean verifyAdjacency(boolean[][] selectedSquares) {
+        int n = selectedSquares.length;
         boolean[][] selectionSnapshot = new boolean[n][n];
         int selectionSize = 0;
         int startRow = 0;
@@ -241,10 +242,7 @@ public class Grid extends AbstractGrid implements Serializable {
                     startColumn = j;
                 }
 
-        int i = startRow;
-        int j = startColumn;
-
-        return verifyAdjacency(i,j,selectionSize-1, selectionSnapshot) == 0;
+        return verifyAdjacency(startRow,startColumn,selectionSize-1, selectionSnapshot) == 0;
     }
 
     private int verifyAdjacency(int i, int j, int remaining, boolean[][] squares) {
@@ -268,13 +266,14 @@ public class Grid extends AbstractGrid implements Serializable {
         return remaining;
     }
 
-    public class Cage implements Serializable {
+    public static class Cage implements Serializable, Cloneable {
 
-        // ogni blocco tiene dei riferimenti alle celle della griglia di gioco che lo costituiscono (memorizzandone gli indici):
-        // in questo modo le celle variano con backtracking sulla griglia, e automaticamente si aggiornano negli oggetti blocco.
+        private static final long serialVersionUID = -328720550746986579L;
+
+        // ogni blocco dello schema di gioco (Cage) tiene dei riferimenti alle celle della griglia di gioco che lo costituiscono
         // Soltanto quando il blocco è completo si effettua un controllo sul soddisfacimento del vincolo aritmetico
 
-        private final Square[] squares;
+        private Square[] squares;
         private final int result;
         private final MathOperation operation;
 
@@ -299,13 +298,14 @@ public class Grid extends AbstractGrid implements Serializable {
         }
 
         public boolean checkTargetResult() {
-           for(Square s : squares) {
-               if(grid[s.getRow()][s.getColumn()] == 0) //vuol dire che il blocco non è stato riempito completamente
-                   // restituisco true perché se il blocco non è completo non ho informazioni a sufficienza per dire che il vincolo non è rispettato
-                   // per cui posso dire che il blocco è ottimisticamente corretto
-                   return true;
-           }
-           return checkTargetResult(0);
+            for(Square s : squares) {
+                if(s.getValue() == 0)
+                    //vuol dire che il blocco non è stato riempito completamente
+                    // restituisco true perché se il blocco non è completo non ho informazioni a sufficienza per dire che il vincolo non è rispettato
+                    // per cui posso dire che il blocco è ottimisticamente corretto
+                    return true;
+            }
+            return checkTargetResult(0);
         }
 
         /*
@@ -316,19 +316,19 @@ public class Grid extends AbstractGrid implements Serializable {
             boolean verified = false;
 
             if(i == squares.length){
-                Square square = squares[0];
-                int res = grid[square.getRow()][square.getColumn()];
+                Square firstSquare = squares[0];
+                int res = firstSquare.getValue();
                 for(int k = 1; k < squares.length; k++){
-                    Square c = squares[k];
+                    Square square = squares[k];
                     switch(operation) {
                         case SUM:
-                            res = res + grid[c.getRow()][c.getColumn()]; break;
+                            res = res + square.getValue(); break;
                         case MULTIPLICATION:
-                            res = res * grid[c.getRow()][c.getColumn()]; break;
+                            res = res * square.getValue(); break;
                         case SUBTRACTION:
-                            res = res - grid[c.getRow()][c.getColumn()]; break;
+                            res = res - square.getValue(); break;
                         case DIVISION:
-                            res = res / grid[c.getRow()][c.getColumn()]; break;
+                            res = res / square.getValue(); break;
                     }
                 }
                 return res == result;
@@ -348,9 +348,79 @@ public class Grid extends AbstractGrid implements Serializable {
             return Arrays.deepToString(squares);
         }
 
+        @Override
+        public Cage clone() {
+            try {
+                Cage clone = (Cage) super.clone();
+                clone.squares = squares.clone();
+                return clone;
+            } catch (CloneNotSupportedException e) {
+                throw new Error(e);
+            }
+        }
     }
 
-    class KenkenSolutions implements Backtracking<Square, Integer> {
+    public static class Square implements Serializable, Cloneable {
+
+        private static final long serialVersionUID = -1403355865754859882L;
+
+        private final int row;
+        private final int column;
+        private int value;
+
+        public Square(int row, int column, int value) {
+            this.row = row;
+            this.column = column;
+            this.value = value;
+        }
+
+        public Square(int row, int column) {
+            this.row = row;
+            this.column = column;
+        }
+
+        public int getRow() {
+            return row;
+        }
+
+        public int getColumn() {
+            return column;
+        }
+
+        public int getValue() { return value; }
+
+        @Override
+        public String toString() {
+            return "<"+ row +","+ column +">";
+        }
+
+        @Override
+        public boolean equals(Object o){
+            if(o == this) return true;
+            if(! (o instanceof Square)) return false;
+            Square c = (Square)o;
+            return c.row ==this.row && c.column ==this.column;
+        }
+
+        @Override
+        public int hashCode() {
+            final int M = 17;
+            int h = 1;
+            h = h * row + M;
+            h = h * column + M;
+            return h;
+        }
+
+    }
+
+    public enum MathOperation {
+        SUM,
+        SUBTRACTION,
+        MULTIPLICATION,
+        DIVISION
+    }
+
+    private class KenkenSolutions implements Backtracking<Square, Integer> {
 
         @Override
         public Square primoPuntoDiScelta() {
@@ -393,8 +463,8 @@ public class Grid extends AbstractGrid implements Serializable {
         public boolean assegnabile(Integer scelta, Square puntoDiScelta) {
             int i = puntoDiScelta.getRow();
             int j = puntoDiScelta.getColumn();
-            int tmp = grid[i][j]; // memorizzo la scelta corrente
-            grid[i][j] = scelta; // assegno temporaneamente la nuova scelta per vedere se rispetta i vincoli
+            int tmp = squares[i][j].value; // memorizzo la scelta corrente
+            squares[i][j].value = scelta; // assegno temporaneamente la nuova scelta per vedere se rispetta i vincoli
             boolean vincoliOk = true;
             List<Square> duplicateSquares = findDuplicates();
             if(!duplicateSquares.isEmpty()) vincoliOk = false;
@@ -403,7 +473,7 @@ public class Grid extends AbstractGrid implements Serializable {
                 if (!invalidTargetResult.isEmpty()) vincoliOk = false;
             }
             if(!vincoliOk) {
-                grid[i][j] = tmp; // ripristino la vecchia griglia
+                squares[i][j].value = tmp; // ripristino la vecchia griglia
                 return false;
             }
             return true;
@@ -413,14 +483,14 @@ public class Grid extends AbstractGrid implements Serializable {
         public void assegna(Integer scelta, Square puntoDiScelta) {
             int i = puntoDiScelta.getRow();
             int j = puntoDiScelta.getColumn();
-            grid[i][j] = scelta;
+            squares[i][j].value = scelta;
         }
 
         @Override
         public void deassegna(Integer scelta, Square puntoDiScelta) {
             int i = puntoDiScelta.getRow();
             int j = puntoDiScelta.getColumn();
-            grid[i][j] = 0;
+            squares[i][j].value = 0;
         }
 
         @Override
@@ -439,22 +509,37 @@ public class Grid extends AbstractGrid implements Serializable {
         public Integer ultimaSceltaAssegnataA(Square puntoDiScelta) {
             int row = puntoDiScelta.getRow();
             int column = puntoDiScelta.getColumn();
-            return grid[row][column];
+            return squares[row][column].value;
         }
 
         @Override
         public void scriviSoluzione(int nr_sol) {
-            System.out.println("Soluzione n° " + nr_sol);
-            System.out.println(Arrays.deepToString(grid));
-
             int[][] gridCopy = new int[n][n];
             for (int i = 0; i < n; i++) {
                 for (int j = 0; j < n; j++) {
-                    gridCopy[i][j] = grid[i][j];
+                    gridCopy[i][j] = squares[i][j].value;
                 }
             }
             solutions.add(gridCopy);
         }
+    }
+
+    private class GridMemento implements Memento {
+
+        final Square[][] squares;
+        final LinkedList<Cage> cageSchema;
+
+        Grid getOriginator() { return Grid.this; }
+
+        GridMemento() {
+            this.squares = Grid.this.squares.clone();
+            this.cageSchema = (LinkedList<Cage>) Grid.this.cageSchema.clone();
+        }
+
+        public String toString() {
+            return cageSchema.toString();
+        }
+
     }
 
 }

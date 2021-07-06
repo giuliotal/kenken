@@ -14,7 +14,7 @@ public class CheckConstraintsCommand implements Command {
     @Override
     public boolean doIt() {
         grid.checkConstraints();
-        return true;
+        return false;
     }
 
     @Override

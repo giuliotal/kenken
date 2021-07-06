@@ -11,17 +11,18 @@ import java.awt.event.ActionEvent;
 public class ShowSolutionsAction extends AbstractAction {
 
     private final GridInterface grid;
-    private final GridPanel gridPanel;
+    private final ControllerPanel controllerPanel;
     private final CommandHandler commandHandler;
 
-    public ShowSolutionsAction(GridInterface grid, GridPanel gridPanel, CommandHandler commandHandler) {
+    public ShowSolutionsAction(GridInterface grid, ControllerPanel controllerPanel, CommandHandler commandHandler) {
         this.grid = grid;
-        this.gridPanel = gridPanel;
+        this.controllerPanel = controllerPanel;
         this.commandHandler = commandHandler;
     }
 
     @Override
     public void actionPerformed(ActionEvent actionEvent) {
-        commandHandler.handle(new ShowSolutionsCommand(grid, gridPanel));
+        int maxSolutions = controllerPanel.getMaxSolutions();
+        commandHandler.handle(new ShowSolutionsCommand(grid, maxSolutions));
     }
 }

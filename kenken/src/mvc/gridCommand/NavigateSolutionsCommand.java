@@ -19,7 +19,7 @@ public class NavigateSolutionsCommand implements Command {
             grid.nextSolution();
         else if(i < 0)
             grid.previousSolution();
-        return true;
+        return false;
     }
 
     @Override

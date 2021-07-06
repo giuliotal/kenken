@@ -36,11 +36,11 @@ public class CreateGridCommand implements Command {
         controllerPanel.setClearGridButton(false);
         controllerPanel.setCheckConstraintsButton(false);
         controllerPanel.setShowSolutionsButton(false);
-        return true;
+        return false;
     }
 
     @Override
     public boolean undoIt() {
-        return true;
+        return false;
     }
 }

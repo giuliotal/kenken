@@ -1,6 +1,7 @@
 package mvc.controller;
 
 import command.CommandHandler;
+import command.HistoryCommandHandler;
 import mvc.model.GridEvent;
 import mvc.model.GridInterface;
 import mvc.model.GridListener;
@@ -50,11 +51,12 @@ public class ControllerPanel extends JPanel implements GridListener {
         historyCommands = new JPanel(new GridLayout(1,2));
 
         JButton undo = new JButton("UNDO");
-        // undo.addActionListener()
+        undo.addActionListener(evt -> commandHandler.handle(HistoryCommandHandler.NonExecutableCommands.UNDO));
         undo.setEnabled(false);
         historyCommands.add(undo);
+
         JButton redo = new JButton("REDO");
-        // redo.addActionListener()
+        redo.addActionListener(evt -> commandHandler.handle(HistoryCommandHandler.NonExecutableCommands.REDO));
         redo.setEnabled(false);
         historyCommands.add(redo);
 
@@ -67,7 +69,7 @@ public class ControllerPanel extends JPanel implements GridListener {
 
         startGameCommand = new JPanel();
 
-        startGameButton = new JButton(new StartGameAction(commandHandler, gridPanel, this));
+        startGameButton = new JButton(new StartGameAction(grid, gridPanel, this, commandHandler));
         startGameButton.setText("START GAME");
         startGameButton.setEnabled(false);
         startGameCommand.add(startGameButton);
@@ -88,7 +90,7 @@ public class ControllerPanel extends JPanel implements GridListener {
         clearGridButton.setText("Clear grid");
         clearGridButton.setEnabled(false);
 
-        showSolutionsButton = new JButton(new ShowSolutionsAction(grid, gridPanel, commandHandler));
+        showSolutionsButton = new JButton(new ShowSolutionsAction(grid, this, commandHandler));
         showSolutionsButton.setText("Show solutions");
         showSolutionsButton.setEnabled(false);
 
@@ -121,6 +123,24 @@ public class ControllerPanel extends JPanel implements GridListener {
         createCageButton.setEnabled(true);
     }
 
+    public int getMaxSolutions() {
+        JFrame topFrame = (JFrame) SwingUtilities.getWindowAncestor(gridPanel);
+        int maxSolutions = 0;
+        boolean validInput = false;
+        do {
+            String input = JOptionPane.showInputDialog(topFrame, "Enter a maximum value of solutions to display:");
+            if (input == null)
+                return -1;
+            try {
+                maxSolutions = Integer.parseInt(input);
+                validInput = true;
+            } catch (NumberFormatException e) {
+                JOptionPane.showMessageDialog(topFrame, "Please insert an integer value.", "Invalid input", JOptionPane.ERROR_MESSAGE);
+            }
+        }while(!validInput);
+        return maxSolutions;
+    }
+
     public void setCreateCageButton(boolean b) { createCageButton.setEnabled(b); }
 
     public void setStartGameButton(boolean b) {
@@ -139,7 +159,7 @@ public class ControllerPanel extends JPanel implements GridListener {
         // inoltre non è più possibile creare nuovi blocchi
         if(e.isCageCreated()) {
             int n = e.getSource().getSize();
-            int lockedSquares = e.getSource().getLockedSquares();
+            int lockedSquares = gridPanel.getLockedSquares();
             if(lockedSquares == n*n){
                 startGameButton.setEnabled(true);
                 createCageButton.setEnabled(false);
