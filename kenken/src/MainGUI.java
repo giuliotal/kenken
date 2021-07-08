@@ -43,13 +43,13 @@ public class MainGUI {
 
         menuBar.add(saveOrLoad);
 
-        JMenu howToPlay = new JMenu("How to play");
+        JMenu help = new JMenu("Help");
+        JMenuItem howToPlay = new JMenuItem("How to play");
         JMenuItem rules = new JMenuItem("KenKen rules");
-        JMenuItem help = new JMenuItem("Help");
-        howToPlay.add(rules);
-        howToPlay.add(help);
+        help.add(rules);
+        help.add(howToPlay);
 
-        menuBar.add(howToPlay);
+        menuBar.add(help);
 
         JPanel contentPane = new JPanel();
         contentPane.setLayout(new BoxLayout(contentPane, BoxLayout.X_AXIS));

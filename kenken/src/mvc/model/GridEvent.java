@@ -4,6 +4,7 @@ public class GridEvent {
 
     private final Grid source;
     private final boolean newGrid;
+    private final boolean schemaUpdated;
     private final boolean cageCreated;
     private final boolean cageCleared;
     private final boolean constraintChecked;
@@ -14,9 +15,8 @@ public class GridEvent {
     public boolean isCageCreated() {
         return cageCreated;
     }
-    public boolean isNewGrid() {
-        return newGrid;
-    }
+    public boolean isNewGrid() { return newGrid; }
+    public boolean isSchemaUpdated() { return schemaUpdated; }
     public boolean isCageCleared() { return cageCleared; }
     public boolean isConstraintChecked() { return constraintChecked; }
     public boolean isNumberInserted() { return numberInserted; }
@@ -30,6 +30,7 @@ public class GridEvent {
         private final Grid source;
 
         private boolean newGrid = false;
+        private boolean schemaUpdated = false;
         private boolean cageCreated = false;
         private boolean cageCleared = false;
         private boolean constraintChecked = false;
@@ -40,6 +41,7 @@ public class GridEvent {
         public Builder(Grid grid) {this.source = grid;}
 
         public Builder newGrid(boolean b) { newGrid = b; return this;}
+        public Builder schemaUpdated(boolean b) { schemaUpdated = b; return this;}
         public Builder cageCreated(boolean b) { cageCreated = b; return this;}
         public Builder cageCleared(boolean b) { cageCleared = b; return this;}
         public Builder constraintsChecked(boolean b) { constraintChecked = b; return this;}
@@ -57,6 +59,7 @@ public class GridEvent {
         newGrid = builder.newGrid; cageCreated = builder.cageCreated; cageCleared = builder.cageCleared;
         constraintChecked = builder.constraintChecked; numberInserted = builder.numberInserted;
         numberDeleted = builder.numberDeleted; solutionRequested = builder.solutionRequested;
+        schemaUpdated = builder.schemaUpdated;
     }
 
 }

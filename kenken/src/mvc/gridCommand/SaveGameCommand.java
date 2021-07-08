@@ -18,7 +18,7 @@ public class SaveGameCommand implements Command {
     public boolean doIt() {
         String filePath = gridPanel.getFilePath();
         if(filePath != null) {
-            if(!grid.save(filePath)) gridPanel.showIOErrorDialog();
+            if(!grid.save(filePath)) gridPanel.showSaveErrorDialog();
             return true;
         }
         return false;

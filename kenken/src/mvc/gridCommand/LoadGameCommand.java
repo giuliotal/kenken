@@ -12,34 +12,33 @@ public class LoadGameCommand implements Command {
     private final GridInterface grid;
     private final GridPanel gridPanel;
     private final ControllerPanel controllerPanel;
-    private final Memento gridMemento;
+//    private final Memento gridMemento;
 
     public LoadGameCommand(GridInterface grid, GridPanel gridPanel, ControllerPanel controllerPanel) {
         this.grid = grid;
         this.gridPanel = gridPanel;
         this.controllerPanel = controllerPanel;
-        this.gridMemento = grid.getMemento();
+//        this.gridMemento = grid.getMemento();
     }
 
     @Override
     public boolean doIt() {
         String filePath = gridPanel.getFilePath();
         if(filePath != null) {
-            if(!grid.load(filePath)) gridPanel.showIOErrorDialog();
+            if(!grid.load(filePath)) gridPanel.showLoadErrorDialog();
             controllerPanel.enableControlButtons();
             controllerPanel.setStartGameButton(true);
             controllerPanel.setCreateCageButton(false);
             controllerPanel.setCheckConstraintsButton(false);
             controllerPanel.setClearGridButton(false);
             controllerPanel.setShowSolutionsButton(false);
-            return true;
         }
-        return true;
+        return false;
     }
 
     @Override
     public boolean undoIt() {
-        grid.setMemento(gridMemento);
-        return true;
+//        grid.setMemento(gridMemento);
+        return false;
     }
 }

@@ -5,8 +5,6 @@ import mvc.controller.ControllerPanel;
 import mvc.model.GridInterface;
 import mvc.view.GridPanel;
 
-import javax.swing.*;
-
 public class CreateGridCommand implements Command {
 
     private final GridInterface grid;
@@ -24,13 +22,7 @@ public class CreateGridCommand implements Command {
 
     @Override
     public boolean doIt() {
-        if(grid.getSize()!=0){
-            JFrame topFrame = (JFrame) SwingUtilities.getWindowAncestor(gridPanel);
-            int ret = JOptionPane.showConfirmDialog(topFrame,
-                    "Are you sure you want to create a new game?\n" +
-                            "All unsaved progress will be lost.", "Are you sure?", JOptionPane.YES_NO_OPTION);
-            if(ret != JOptionPane.YES_OPTION) return false;
-        }
+        if(grid.getSize()!= 0 && !gridPanel.showNewGameDialog()) return false;
         grid.setSize(n);
         controllerPanel.enableControlButtons();
         controllerPanel.setClearGridButton(false);

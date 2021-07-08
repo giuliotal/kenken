@@ -48,12 +48,11 @@ public class GridPanel extends JPanel implements GridListener {
         JFrame mainFrame = (JFrame) SwingUtilities.getWindowAncestor(this);
         int n = e.getSource().getSize();
 
-        if(e.isNewGrid()) { // se le dimensioni della griglia sono cambiate, ricostruisco interamente il pannello
+        if(e.isNewGrid()) {
             rebuildGrid(n);
-            updateCageSchema(e.getSource().getCageSchema(), n);
         }
-        if(e.isCageCreated()) {
-            updateCageSchema(e.getSource().getCageSchema(), n);
+        if(e.isSchemaUpdated()) { // caricamento/ripristino di una griglia di gioco o inserimento di un blocco
+            repaintCageSchema(e.getSource().getCageSchema(), n);
             resetSelection();
         }
         if(e.isCageCleared()) {
@@ -71,25 +70,25 @@ public class GridPanel extends JPanel implements GridListener {
             }
             // tra le celle che appartengono ai blocchi che non soddisfano il vincolo aritmetico, individuo
             // soltanto quella che contiene il vincolo in alto a sinistra, e lo rendo di colore rosso
-            int minRow = Integer.MAX_VALUE;
-            int minCol = Integer.MAX_VALUE;
-            for(Grid.Cage c : invalidTargetResultCages){
-                Grid.Square targetResultSquare = null;
-                for(Grid.Square s : c.getSquares()) {
-                    int i = s.getRow();
-                    int j = s.getColumn();
-                    if(i < minRow && j < minCol) {
-                        minRow = i;
-                        minCol = j;
-                        targetResultSquare = s;
+            if(!invalidTargetResultCages.isEmpty()) {
+                int minRow = Integer.MAX_VALUE;
+                int minCol = Integer.MAX_VALUE;
+                for (Grid.Cage c : invalidTargetResultCages) {
+                    for (Grid.Square s : c.getSquares()) {
+                        int i = s.getRow();
+                        int j = s.getColumn();
+                        if (i < minRow && j < minCol) {
+                            minRow = i;
+                            minCol = j;
+                        }
                     }
                 }
+                buttonGrid[minRow][minCol].setUI(new MetalButtonUI() {
+                    protected Color getDisabledTextColor() {
+                        return Color.RED;
+                    }
+                });
             }
-            buttonGrid[minRow][minCol].setUI(new MetalButtonUI() {
-                protected Color getDisabledTextColor() {
-                    return Color.RED;
-                }
-            });
         }
         if(e.isNumberInserted()) {
             for (int i = 0; i < gridSize; i++) {
@@ -152,23 +151,67 @@ public class GridPanel extends JPanel implements GridListener {
 
                 buttonGrid[i][j] = square;
                 add(square);
+
+                JTextField input = new JTextField();
+                input.setFont(input.getFont().deriveFont(Font.PLAIN, 35));
+                input.setDisabledTextColor(Color.BLACK);
+                input.setHorizontalAlignment(JTextField.CENTER);
+                input.setBorder(BorderFactory.createEmptyBorder());
+                ((AbstractDocument) input.getDocument()).setDocumentFilter(documentFilter);
+
+                buttonGrid[i][j].add(input, BorderLayout.CENTER);
+                inputGrid[i][j] = input;
+                input.setVisible(false);
+                input.setEnabled(false);
+                int row = i;
+                int column = j;
+                // ascolta inserimenti e rimozioni all'interno del JTextField
+                input.getDocument().addDocumentListener(new DocumentListener() {
+                    @Override
+                    public void insertUpdate(DocumentEvent documentEvent) {
+                        int val = Integer.parseInt(input.getText());
+                        commandHandler.handle(new InsertNumberCommand(grid,row,column,val));
+                    }
+
+                    @Override
+                    public void removeUpdate(DocumentEvent documentEvent) {
+                        commandHandler.handle(new InsertNumberCommand(grid,row,column,0));
+                    }
+
+                    @Override
+                    public void changedUpdate(DocumentEvent documentEvent) {}
+                });
             }
         }
     }
 
-    private void updateCageSchema(List<Grid.Cage> cageSchema, int n) {
+    private void repaintCageSchema(List<Grid.Cage> cageSchema, int n) {
+        boolean[][] currentSchema = new boolean[n][n];
         for(Grid.Cage c : cageSchema) {
             boolean[][] cage = new boolean[n][n];
             for(Grid.Square s : c.getSquares()){
-                int i = s.getRow(); int j = s.getColumn();
+                int i = s.getRow();
+                int j = s.getColumn();
+                int val = s.getValue();
                 cage[i][j] = true;
+                currentSchema[i][j] = true;
+                // se il numero è già visibile sulla griglia evito di invocare setText per evitare di aggiungere un InsertNumberCommand nella cronologia dei comandi
+                String text = inputGrid[i][j].getText();
+                if(!text.equals("")) {
+                    int number = Integer.parseInt(text);
+                    if(number != val)
+                        inputGrid[i][j].setText(val == 0 ? "" : val + ""); // senza questa istruzione carico lo schema senza i numeri precedentemente inseriti e salvati
+                }
+                else if(val != 0) {
+                    inputGrid[i][j].setText(val + "");
+                }
             }
             int minRow = Integer.MAX_VALUE;
             int minCol = Integer.MAX_VALUE;
             for (int i = 0; i < n; i++) {
                 for (int j = 0; j < n; j++) {
                     if(cage[i][j]){
-                        setButtonBorders(buttonGrid[i][j], i, j, cage);
+                        paintButtonBorders(buttonGrid[i][j], i, j, cage);
                         // individuo la cella più in alto a sinistra del blocco, dove inserire il risultato
                         // da ottenere combinando le cifre del blocco
                         if(i < minRow && j < minCol){
@@ -178,12 +221,24 @@ public class GridPanel extends JPanel implements GridListener {
                     }
                 }
             }
-            setCageTargetResult(c.getResult(), c.getOperation(), minRow, minCol);
+            paintCageTargetResult(c.getResult(), c.getOperation(), minRow, minCol);
         }
+        for (int i = 0; i < n; i++) {
+            for (int j = 0; j < n; j++) {
+                if(!currentSchema[i][j]) {
+                    buttonGrid[i][j].setBorder(UIManager.getBorder("Button.border"));
+                    buttonGrid[i][j].setText("");
+                }
+            }
+        }
+//        if(getLockedSquares() == n*n) {
+//            startGameView();
+//        }
     }
 
-    private void setButtonBorders(JToggleButton button, int i, int j, boolean[][] selectedSquares) {
+    private void paintButtonBorders(JToggleButton button, int i, int j, boolean[][] selectedSquares) {
         button.setEnabled(false);
+        inputGrid[i][j].setVisible(true);
         int top, left, bottom, right;
         top = left = bottom = right = 4;
         if(i > 0 && selectedSquares[i-1][j]) top = 1;
@@ -193,7 +248,7 @@ public class GridPanel extends JPanel implements GridListener {
         button.setBorder(BorderFactory.createMatteBorder(top, left, bottom, right, Color.BLACK));
     }
 
-    private void setCageTargetResult(int result, Grid.MathOperation operation, int i, int j) {
+    private void paintCageTargetResult(int result, Grid.MathOperation operation, int i, int j) {
         String op = null;
         switch(operation) {
             case SUM: op = "+"; break;
@@ -314,37 +369,10 @@ public class GridPanel extends JPanel implements GridListener {
     }
 
     public void startGameView() {
-        int n = gridSize;
-        for (int i = 0; i < n; i++) {
-            for (int j = 0; j < n; j++) {
-
-                JTextField input = new JTextField();
-                input.setFont(input.getFont().deriveFont(Font.PLAIN, 35));
-                input.setHorizontalAlignment(JTextField.CENTER);
-                input.setBorder(BorderFactory.createEmptyBorder());
-                ((AbstractDocument) input.getDocument()).setDocumentFilter(documentFilter);
-
-                int row = i;
-                int column = j;
-                // ascolta inserimenti e rimozioni all'interno del JTextField
-                input.getDocument().addDocumentListener(new DocumentListener() {
-                    @Override
-                    public void insertUpdate(DocumentEvent documentEvent) {
-                        int val = Integer.parseInt(input.getText());
-                        commandHandler.handle(new InsertNumberCommand(grid,row,column,val));
-                    }
-
-                    @Override
-                    public void removeUpdate(DocumentEvent documentEvent) {
-                        commandHandler.handle(new InsertNumberCommand(grid,row,column,0));
-                    }
-
-                    @Override
-                    public void changedUpdate(DocumentEvent documentEvent) {}
-                });
-
-                buttonGrid[i][j].add(input, BorderLayout.CENTER);
-                inputGrid[i][j] = input;
+        for (int i = 0; i < gridSize; i++) {
+            for (int j = 0; j < gridSize; j++) {
+                JTextField input = inputGrid[i][j];
+                input.setEnabled(true);
             }
         }
         revalidate();
@@ -363,9 +391,23 @@ public class GridPanel extends JPanel implements GridListener {
         return null;
     }
 
-    public void showIOErrorDialog() {
+    public void showLoadErrorDialog() {
         JFrame mainFrame = (JFrame) SwingUtilities.getWindowAncestor(this);
         JOptionPane.showMessageDialog(mainFrame,"The file selected may be damaged or incompatible", "An error occurred trying to load the game",JOptionPane.ERROR_MESSAGE);
+    }
+
+    public void showSaveErrorDialog() {
+        JFrame mainFrame = (JFrame) SwingUtilities.getWindowAncestor(this);
+        JOptionPane.showMessageDialog(mainFrame,"Cannot save an empty game!", "An error occurred trying to save the game",JOptionPane.ERROR_MESSAGE);
+    }
+
+    public boolean showNewGameDialog() {
+        JFrame topFrame = (JFrame) SwingUtilities.getWindowAncestor(this);
+        int ret = JOptionPane.showConfirmDialog(topFrame,
+                "Are you sure you want to create a new game?\n" +
+                        "All unsaved progress will be lost.", "Are you sure?", JOptionPane.YES_NO_OPTION);
+        if(ret != JOptionPane.YES_OPTION) return false;
+        return true;
     }
 
     class InputFilter extends DocumentFilter {

@@ -11,7 +11,7 @@ public class Test {
         JFrame f = new JFrame();
         JPanel panel = new JPanel(new GridLayout(4,4));
         JButton button = new JButton("22+");
-        JTextField input = new JTextField();
+        JTextField input = new JTextField("ENZO");
         button.addActionListener(new ActionListener() {
             @Override
             public void actionPerformed(ActionEvent actionEvent) {
@@ -20,6 +20,7 @@ public class Test {
         });
         button.setHorizontalAlignment(SwingConstants.LEFT);
         button.setEnabled(true);
+        input.setEnabled(false);
 
 
         f.getContentPane().add(panel);

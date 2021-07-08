@@ -52,7 +52,7 @@ public class Grid extends AbstractGrid implements Serializable {
 
     public int[][] getCurrentSolution() { return currentSolution; }
 
-    // cambiare la dimensione significa creare una nuova griglia
+    // cambiare la dimensione della griglia di gioco implica la creazione di una nuova griglia vuota
     public void setSize(int n) {
         this.n = n;
         this.squares = new Square[n][n];
@@ -129,7 +129,12 @@ public class Grid extends AbstractGrid implements Serializable {
     }
 
     public void findSolutions(int maxSolutions) {
-        if(solutions.isEmpty()) new KenkenSolutions().risolvi(maxSolutions);
+        // effettuo il calcolo delle soluzioni solo se non ho già a disposizione il numero di soluzioni richiesto
+        if(solutions.size() != maxSolutions) {
+            clear();
+            solutions.clear();
+            new KenkenSolutions().risolvi(maxSolutions);
+        }
         if(solutions.size() > 0) currentSolution = solutions.get(0);
         else currentSolution = null;
         notifyListeners(new GridEvent.Builder(this).solutionRequested(true).build());
@@ -163,6 +168,7 @@ public class Grid extends AbstractGrid implements Serializable {
 
     public boolean save(String pathName) {
         if(!pathName.contains(".kenken")) return false;
+        if(n == 0) return false;
         try {
             ObjectOutputStream oos = new ObjectOutputStream(new FileOutputStream(pathName));
             oos.writeObject(squares);
@@ -184,7 +190,7 @@ public class Grid extends AbstractGrid implements Serializable {
             squares = savedGrid;
             cageSchema = (LinkedList<Cage>) ois.readObject();
             ois.close();
-            notifyListeners(new GridEvent.Builder(this).newGrid(true).build());
+            notifyListeners(new GridEvent.Builder(this).newGrid(true).schemaUpdated(true).build());
         }catch(IOException | ClassNotFoundException e) {
             e.printStackTrace();
             return false;
@@ -204,10 +210,21 @@ public class Grid extends AbstractGrid implements Serializable {
         GridMemento memento = (GridMemento) m;
         if(this != memento.getOriginator())
             throw new IllegalArgumentException();
-        setSize(memento.squares.length);
-        squares = memento.squares.clone();
-        cageSchema = (LinkedList<Cage>) memento.cageSchema.clone();
-        notifyListeners(new GridEvent.Builder(this).newGrid(true).build());
+        int previousSize = memento.squares.length;
+        if(n != previousSize) setSize(n);
+        //TODO trovare una spiegazione a questa cosa: il clone mi da problemi di aliasing
+//        squares = memento.squares.clone();
+//        cageSchema = (LinkedList<Cage>) memento.cageSchema.clone();
+        this.cageSchema = new LinkedList<>();
+        for(Cage cage : memento.cageSchema) {
+            LinkedList<Square> squareList = new LinkedList<>();
+            for (Square s : cage.squares) {
+                squares[s.getRow()][s.getColumn()].value = s.value;
+                squareList.add(s);
+            }
+            cageSchema.add(new Cage(squareList.toArray(new Square[squareList.size()]), cage.result, cage.operation));
+        }
+        notifyListeners(new GridEvent.Builder(this).schemaUpdated(true).build());
     }
 
     public boolean createCage(boolean[][] selectedSquares, int result, MathOperation op) {
@@ -222,7 +239,7 @@ public class Grid extends AbstractGrid implements Serializable {
         }
         Cage c = new Cage(cage.toArray(new Square[cage.size()]), result, op);
         cageSchema.add(c);
-        notifyListeners(new GridEvent.Builder(this).cageCreated(true).build());
+        notifyListeners(new GridEvent.Builder(this).schemaUpdated(true).build());
         return true;
     }
 
@@ -379,6 +396,12 @@ public class Grid extends AbstractGrid implements Serializable {
             this.column = column;
         }
 
+        public Square(Square square) {
+            this.row = square.row;
+            this.column = square.column;
+            this.value = square.value;
+        }
+
         public int getRow() {
             return row;
         }
@@ -409,6 +432,16 @@ public class Grid extends AbstractGrid implements Serializable {
             h = h * row + M;
             h = h * column + M;
             return h;
+        }
+
+        public Square clone() {
+            try {
+                Square clone = (Square) super.clone();
+                return clone;
+            } catch (CloneNotSupportedException e) {
+                throw new Error(e);
+            }
+
         }
 
     }
@@ -532,8 +565,17 @@ public class Grid extends AbstractGrid implements Serializable {
         Grid getOriginator() { return Grid.this; }
 
         GridMemento() {
-            this.squares = Grid.this.squares.clone();
-            this.cageSchema = (LinkedList<Cage>) Grid.this.cageSchema.clone();
+            squares = new Square[n][n];
+            this.cageSchema = new LinkedList<>();
+            for(Cage cage : Grid.this.cageSchema) {
+                LinkedList<Square> squareList = new LinkedList<>();
+                for (Square square : cage.squares) {
+                    Square s = new Square(square);
+                    squares[s.getRow()][s.getColumn()] = s;
+                    squareList.add(s);
+                }
+                cageSchema.add(new Cage(squareList.toArray(new Square[squareList.size()]), cage.result, cage.operation));
+            }
         }
 
         public String toString() {

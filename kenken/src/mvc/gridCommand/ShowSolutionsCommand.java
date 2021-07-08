@@ -18,6 +18,7 @@ public class ShowSolutionsCommand implements Command {
 
     @Override
     public boolean doIt() {
+        if(maxSolutions == -1) return false;
         grid.findSolutions(maxSolutions);
         return true;
     }

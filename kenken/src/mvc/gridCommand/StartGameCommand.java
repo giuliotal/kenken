@@ -27,7 +27,7 @@ public class StartGameCommand implements Command {
         controllerPanel.setCheckConstraintsButton(true);
         controllerPanel.setClearGridButton(true);
         controllerPanel.setShowSolutionsButton(true);
-        return true;
+        return false;
     }
 
     @Override

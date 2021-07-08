@@ -10,7 +10,6 @@ import mvc.view.GridPanel;
 
 import javax.swing.*;
 import java.awt.*;
-import java.util.List;
 
 public class ControllerPanel extends JPanel implements GridListener {
 
@@ -37,6 +36,8 @@ public class ControllerPanel extends JPanel implements GridListener {
     private final JPanel solutionNavigationCommands;
     private final JButton previousSolutionButton;
     private final JButton nextSolutionButton;
+
+    private boolean gameStarted = false;
 
     public ControllerPanel(GridInterface grid, CommandHandler commandHandler, GridPanel gridPanel) {
         this.subject = grid;
@@ -157,10 +158,14 @@ public class ControllerPanel extends JPanel implements GridListener {
     public void gridChanged(GridEvent e) {
         // verifico se tutte le celle appartengono ad un blocco, in caso affermativo può partire il gioco
         // inoltre non è più possibile creare nuovi blocchi
-        if(e.isCageCreated()) {
+        if(e.isNewGrid()) {
+            gameStarted = false;
+        }
+        if(e.isSchemaUpdated()) {
             int n = e.getSource().getSize();
             int lockedSquares = gridPanel.getLockedSquares();
-            if(lockedSquares == n*n){
+            if(lockedSquares == n*n && !gameStarted){
+                gameStarted = true;
                 startGameButton.setEnabled(true);
                 createCageButton.setEnabled(false);
             }
