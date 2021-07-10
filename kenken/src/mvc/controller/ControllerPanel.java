@@ -2,55 +2,46 @@ package mvc.controller;
 
 import command.CommandHandler;
 import command.HistoryCommandHandler;
-import mvc.model.GridEvent;
-import mvc.model.GridInterface;
-import mvc.model.GridListener;
-import mvc.view.CreateCageAction;
+import mvc.gridCommand.*;
+import mvc.model.*;
 import mvc.view.GridPanel;
 
 import javax.swing.*;
 import java.awt.*;
+import java.awt.event.ActionEvent;
+import java.awt.event.ActionListener;
+import java.util.LinkedList;
+import java.util.List;
 
 public class ControllerPanel extends JPanel implements GridListener {
 
-    private final GridInterface subject;
     private final GridPanel gridPanel;
-    private final CommandHandler commandHandler;
 
-    private final JPanel controlCommands;
-
-    private final JPanel historyCommands;
     private final JButton undo;
     private final JButton redo;
 
-    private final JPanel createCageCommand;
     private final JButton createCageButton;
 
-    private final JPanel startGameCommand;
     private final JButton startGameButton;
 
-    private final JPanel gameCommands;
     private final JButton checkConstraintsButton;
     private final JButton clearGridButton;
     private final JButton showSolutionsButton;
 
-    private final JPanel solutionNavigationCommands;
     private final JButton previousSolutionButton;
     private final JButton nextSolutionButton;
 
     private boolean gameStarted = false;
 
     public ControllerPanel(GridInterface grid, CommandHandler commandHandler, GridPanel gridPanel) {
-        this.subject = grid;
         this.gridPanel = gridPanel;
-        this.commandHandler = commandHandler;
         grid.addGridListener(this);
 
         this.setLayout(new BoxLayout(this,BoxLayout.Y_AXIS));
 
-        controlCommands = new JPanel(new GridLayout(3,1,0,10));
+        JPanel controlCommands = new JPanel(new GridLayout(3, 1, 0, 10));
 
-        historyCommands = new JPanel(new GridLayout(1,2));
+        JPanel historyCommands = new JPanel(new GridLayout(1, 2));
 
         undo = new JButton("UNDO");
         undo.addActionListener(evt -> commandHandler.handle(HistoryCommandHandler.NonExecutableCommands.UNDO));
@@ -62,17 +53,57 @@ public class ControllerPanel extends JPanel implements GridListener {
         redo.setEnabled(false);
         historyCommands.add(redo);
 
-        createCageCommand = new JPanel();
+        JPanel createCageCommand = new JPanel();
 
-        createCageButton = new JButton(new CreateCageAction(subject, commandHandler, gridPanel));
-        createCageButton.setText("Create cage");
+        createCageButton = new JButton("Create cage");
+        createCageButton.addActionListener(evt -> {
+            // verifica la selezione effettuata dall'utente
+            boolean[][] selectedSquares = gridPanel.getSelectedSquares();
+            boolean buttonSelected = false;
+            for (int i = 0; i < selectedSquares.length && !buttonSelected; i++)
+                for (int j = 0; j < selectedSquares.length && !buttonSelected; j++)
+                    if(selectedSquares[i][j]) buttonSelected = true;
+
+            if(!buttonSelected) {
+                gridPanel.showErrorDialog("Invalid cage selection",
+                        "At least one square must be selected" );
+                return;
+            }
+            if(!Cage.verifyAdjacency(selectedSquares)) {
+                gridPanel.showErrorDialog("Invalid cage selection",
+                        "Square selected have to be adjacent in order to bulid a cage.\nPlease change selection.");
+                return;
+            }
+
+            int result = gridPanel.getTargetResultInput();
+            if(result == -1) return;
+
+            MathOperation operation = gridPanel.getOperationInput();
+            if(operation == null) return;
+
+            List<Square> squares = new LinkedList<>();
+            for (int i = 0; i < selectedSquares.length; i++) {
+                for (int j = 0; j < selectedSquares.length; j++) {
+                    if(selectedSquares[i][j]) squares.add(new Square(i,j));
+                }
+            }
+            commandHandler.handle(new CreateCageCommand(grid, squares.toArray(new Square[0]), result, operation));
+        });
         createCageButton.setEnabled(false);
         createCageCommand.add(createCageButton);
 
-        startGameCommand = new JPanel();
+        JPanel startGameCommand = new JPanel();
 
-        startGameButton = new JButton(new StartGameAction(grid, gridPanel, this, commandHandler));
-        startGameButton.setText("START GAME");
+        startGameButton = new JButton("START GAME");
+        startGameButton.addActionListener(new ActionListener() {
+            public void actionPerformed(ActionEvent actionEvent) {
+                gridPanel.startGameView();
+                startGameButton.setEnabled(false);
+                checkConstraintsButton.setEnabled(true);
+                clearGridButton.setEnabled(true);
+                showSolutionsButton.setEnabled(true);
+            }
+        });
         startGameButton.setEnabled(false);
         startGameCommand.add(startGameButton);
 
@@ -80,36 +111,34 @@ public class ControllerPanel extends JPanel implements GridListener {
         controlCommands.add(createCageCommand);
         controlCommands.add(startGameCommand);
 
-        // ------------------------------------------------
+        JPanel gameCommands = new JPanel(new GridLayout(4, 1, 0, 10));
 
-        gameCommands = new JPanel(new GridLayout(4,1,0,10));
-
-        checkConstraintsButton = new JButton(new CheckConstraintsAction(grid, commandHandler)); //checkConstraintsAction
-        checkConstraintsButton.setText("Check constraints");
+        checkConstraintsButton = new JButton("Check constraints");
+        checkConstraintsButton.addActionListener(evt -> commandHandler.handle(new CheckConstraintsCommand(grid)));
         checkConstraintsButton.setEnabled(false);
+        gameCommands.add(checkConstraintsButton);
 
-        clearGridButton = new JButton(new ClearGridAction(grid,commandHandler));
-        clearGridButton.setText("Clear grid");
+        clearGridButton = new JButton("Clear grid");
+        clearGridButton.addActionListener(evt -> commandHandler.handle(new ClearGridCommand(grid)));
         clearGridButton.setEnabled(false);
+        gameCommands.add(clearGridButton);
 
-        showSolutionsButton = new JButton(new ShowSolutionsAction(grid, gridPanel, commandHandler));
-        showSolutionsButton.setText("Show solutions");
+        showSolutionsButton = new JButton("Show solutions");
+        showSolutionsButton.addActionListener(evt -> new ShowSolutionsCommand(grid, gridPanel));
         showSolutionsButton.setEnabled(false);
+        gameCommands.add(showSolutionsButton);
 
-        solutionNavigationCommands = new JPanel(new GridLayout(1,2,0,10));
-        previousSolutionButton = new JButton(new NavigateSolutionsAction(grid,commandHandler,-1));
-        previousSolutionButton.setText("Previous");
+        JPanel solutionNavigationCommands = new JPanel(new GridLayout(1, 2, 0, 10));
+
+        previousSolutionButton = new JButton("Previous");
+        previousSolutionButton.addActionListener(evt -> commandHandler.handle(new NavigateSolutionsCommand(grid, -1)));
         previousSolutionButton.setEnabled(false);
         solutionNavigationCommands.add(previousSolutionButton);
 
-        nextSolutionButton = new JButton(new NavigateSolutionsAction(grid,commandHandler,1));
-        nextSolutionButton.setText("Next");
+        nextSolutionButton = new JButton("Next");
+        previousSolutionButton.addActionListener(evt -> commandHandler.handle(new NavigateSolutionsCommand(grid, 1)));
         nextSolutionButton.setEnabled(false);
         solutionNavigationCommands.add(nextSolutionButton);
-
-        gameCommands.add(checkConstraintsButton);
-        gameCommands.add(clearGridButton);
-        gameCommands.add(showSolutionsButton);
         gameCommands.add(solutionNavigationCommands);
 
         add(Box.createRigidArea(new Dimension(0,20)));
@@ -122,9 +151,7 @@ public class ControllerPanel extends JPanel implements GridListener {
 
     public void setCreateCageButton(boolean b) { createCageButton.setEnabled(b); }
 
-    public void setStartGameButton(boolean b) {
-        startGameButton.setEnabled(b);
-    }
+    public void setStartGameButton(boolean b) { startGameButton.setEnabled(b); }
 
     public void setCheckConstraintsButton(boolean b) { checkConstraintsButton.setEnabled(b);}
 
@@ -134,8 +161,6 @@ public class ControllerPanel extends JPanel implements GridListener {
 
     @Override
     public void gridChanged(GridEvent e) {
-        // verifico se tutte le celle appartengono ad un blocco, in caso affermativo può partire il gioco
-        // inoltre non è più possibile creare nuovi blocchi
         if(e.isNewGrid()) {
             gameStarted = false;
             undo.setEnabled(true);
@@ -151,6 +176,10 @@ public class ControllerPanel extends JPanel implements GridListener {
                 gameStarted = true;
                 startGameButton.setEnabled(true);
                 createCageButton.setEnabled(false);
+            }
+            else {
+                startGameButton.setEnabled(false);
+                createCageButton.setEnabled(true);
             }
         }
         if(e.isSolutionRequested()) {

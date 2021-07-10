@@ -1,11 +1,11 @@
 import command.HistoryCommandHandler;
 import mvc.controller.ControllerPanel;
+import mvc.gridCommand.CreateGridCommand;
+import mvc.gridCommand.LoadGameCommand;
+import mvc.gridCommand.SaveGameCommand;
 import mvc.model.Grid;
 import mvc.model.GridInterface;
-import mvc.view.CreateGridAction;
 import mvc.view.GridPanel;
-import mvc.view.LoadGameAction;
-import mvc.view.SaveGameAction;
 
 import javax.swing.*;
 import java.awt.*;
@@ -18,27 +18,30 @@ public class MainGUI {
 
         final GridInterface grid = new Grid();
 
-        final HistoryCommandHandler handler = new HistoryCommandHandler();
-        // i bottoni undo e redo li inserisco nel gridController e gli passo come handler l'historyCommandHandler)
+        final HistoryCommandHandler commandHandler = new HistoryCommandHandler();
 
-        final GridPanel gridPanel = new GridPanel(grid, handler);
+        final GridPanel gridPanel = new GridPanel(grid, commandHandler);
         gridPanel.setPreferredSize(new Dimension(500, 500));
 
-        final ControllerPanel controllerPanel = new ControllerPanel(grid, handler, gridPanel);
+        final ControllerPanel controllerPanel = new ControllerPanel(grid, commandHandler, gridPanel);
 
         JMenu newGame = new JMenu("New game");
         for(int i = 3; i<=6; i++){
-            JMenuItem newGrid = new JMenuItem(new CreateGridAction(grid, gridPanel, controllerPanel, handler, i));
+            JMenuItem newGrid = new JMenuItem(i+"x"+i);
+            int finalI = i;
+            newGrid.addActionListener(evt -> commandHandler.handle(new CreateGridCommand(grid, gridPanel, controllerPanel, finalI)));
             newGame.add(newGrid);
         }
         menuBar.add(newGame);
 
         JMenu saveOrLoad = new JMenu("Save/load");
-        JMenuItem saveGame = new JMenuItem(new SaveGameAction(grid, gridPanel, handler));
-        saveGame.setText("Save game");
-        JMenuItem loadGame = new JMenuItem(new LoadGameAction(grid, gridPanel, controllerPanel, handler));
-        loadGame.setText("Load game");
+
+        JMenuItem saveGame = new JMenuItem("Save game");
+        saveGame.addActionListener(evt -> commandHandler.handle(new SaveGameCommand(grid, gridPanel)));
         saveOrLoad.add(saveGame);
+
+        JMenuItem loadGame = new JMenuItem("Load game");
+        loadGame.addActionListener(evt -> commandHandler.handle(new LoadGameCommand(grid, gridPanel, controllerPanel)));
         saveOrLoad.add(loadGame);
 
         menuBar.add(saveOrLoad);

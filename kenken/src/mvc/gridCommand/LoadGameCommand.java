@@ -3,7 +3,6 @@ package mvc.gridCommand;
 import command.Command;
 import mvc.controller.ControllerPanel;
 import mvc.model.GridInterface;
-import mvc.model.Memento;
 import mvc.view.GridPanel;
 
 public class LoadGameCommand implements Command {
@@ -12,20 +11,20 @@ public class LoadGameCommand implements Command {
     private final GridInterface grid;
     private final GridPanel gridPanel;
     private final ControllerPanel controllerPanel;
-//    private final Memento gridMemento;
 
     public LoadGameCommand(GridInterface grid, GridPanel gridPanel, ControllerPanel controllerPanel) {
         this.grid = grid;
         this.gridPanel = gridPanel;
         this.controllerPanel = controllerPanel;
-//        this.gridMemento = grid.getMemento();
     }
 
     @Override
     public boolean doIt() {
-        String filePath = gridPanel.getFilePath();
+        String filePath = gridPanel.getFilePathInput();
         if(filePath != null) {
-            if(!grid.load(filePath)) gridPanel.showLoadErrorDialog();
+            if(!grid.load(filePath))
+                gridPanel.showErrorDialog("An error occurred trying to load the game",
+                        "The file selected may be damaged or incompatible");
             else {
                 controllerPanel.setStartGameButton(true);
                 controllerPanel.setCreateCageButton(false);
@@ -39,7 +38,6 @@ public class LoadGameCommand implements Command {
 
     @Override
     public boolean undoIt() {
-//        grid.setMemento(gridMemento);
         return false;
     }
 }

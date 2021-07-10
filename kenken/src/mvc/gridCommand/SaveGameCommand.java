@@ -16,9 +16,11 @@ public class SaveGameCommand implements Command {
 
     @Override
     public boolean doIt() {
-        String filePath = gridPanel.getFilePath();
+        String filePath = gridPanel.getFilePathInput();
         if(filePath != null) {
-            if(!grid.save(filePath)) gridPanel.showSaveErrorDialog();
+            if(!grid.save(filePath))
+                gridPanel.showErrorDialog("An error occurred trying to save the game",
+                        "Cannot save an empty game!");
             return true;
         }
         return false;

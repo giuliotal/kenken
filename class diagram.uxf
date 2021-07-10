@@ -1,0 +1,1314 @@
+<?xml version="1.0" encoding="UTF-8" standalone="no"?>
+<diagram program="umlet" version="14.3.0">
+  <zoom_level>5</zoom_level>
+  <element>
+    <id>UMLClass</id>
+    <coordinates>
+      <x>345</x>
+      <y>60</y>
+      <w>260</w>
+      <h>205</h>
+    </coordinates>
+    <panel_attributes>&lt;&lt;interface&gt;&gt;
+GridInterface
+--
++ addGridListener(l:GridListener):void
++ removeGridListener(l:GridListener):void
++ createCage(squares:Square[*], result:int, op:MathOperation):boolean
++ insertNumber(number:int, row:int, column:int):void
++ deleteNumber(row:int, column:int):void
++ clear():void
++ getSize():int
++ setSize(n:int):void
++ getDuplicateSquares():Square[*]
++ getInvalidTargetResultCages():Cage[*]
++ checkConstraints():boolean
++ findSolutions(maxSolutions:int):void
++ getTotalSolutions():int
++ getCurrentSolution():int[*]
++ nextSolution():void
++ previousSolution():void
++ hasNextSolution():boolean
++ hasPreviousSolution():boolean
++ save(pathName:String):boolean
++ load(pathName:String):boolean
++ getMemento():Memento
++ setMemento(m:Memento):void</panel_attributes>
+    <additional_attributes/>
+  </element>
+  <element>
+    <id>UMLClass</id>
+    <coordinates>
+      <x>405</x>
+      <y>295</y>
+      <w>135</w>
+      <h>55</h>
+    </coordinates>
+    <panel_attributes>/AbstractGrid/
+--
+- listeners:GridListener[*]
+--
++ addGridListener(l:GridListener)
++ removeGridListener(l:GridListener)
+# notifyListeners(e:GridEvent)
+</panel_attributes>
+    <additional_attributes/>
+  </element>
+  <element>
+    <id>UMLClass</id>
+    <coordinates>
+      <x>640</x>
+      <y>60</y>
+      <w>260</w>
+      <h>370</h>
+    </coordinates>
+    <panel_attributes>Grid
+--
+/- serialVersionUID:long/
+- n:int
+- squares:Square[*]
+- solutions:int[*]
+- currentSolution:int
+- cageSchema:Cage[*]
+- duplicateSquares:Square[*]
+- invalidTargetResultCages:Cage[*]
+--
++ getGrid():Square[*]
++ getCageSchema():Cage[*]
++ createCage(squares:Square[*], result:int, op:MathOperation):boolean
++ insertNumber(number:int, row:int, column:int):void
++ deleteNumber(row:int, column:int):void
++ clear():void
++ getSize():int
++ setSize(n:int):void
++ getDuplicateSquares():Square[*]
++ getInvalidTargetResultCages():Cage[*]
++ checkConstraints():boolean
++ findSolutions(maxSolutions:int):void
++ getTotalSolutions():int
++ getCurrentSolution():int[*]
++ nextSolution():void
++ previousSolution():void
++ hasNextSolution():boolean
++ hasPreviousSolution():boolean
++ save(pathName:String):boolean
++ load(pathName:String):boolean
++ getMemento():Memento
++ setMemento(m:Memento):void
+- findDuplicates():Square[*]
+- findIncorrectCages():Cage[*]
++ toString():String
++ equals(o:Object):boolean
++ hashCode():int
+
+{innerclass
+KenKenSolutions
+innerclass}
+
+{innerclass
+GridMemento
+--
+- squares:Square[*]
+- cageSchema:Cage[*]
+--
++ getOriginator():Grid
+innerclass}
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+</panel_attributes>
+    <additional_attributes/>
+  </element>
+  <element>
+    <id>Relation</id>
+    <coordinates>
+      <x>465</x>
+      <y>260</y>
+      <w>15</w>
+      <h>45</h>
+    </coordinates>
+    <panel_attributes>lt=&lt;&lt;.</panel_attributes>
+    <additional_attributes>10.0;10.0;10.0;70.0</additional_attributes>
+  </element>
+  <element>
+    <id>Relation</id>
+    <coordinates>
+      <x>535</x>
+      <y>60</y>
+      <w>115</w>
+      <h>255</h>
+    </coordinates>
+    <panel_attributes>lt=&lt;&lt;-</panel_attributes>
+    <additional_attributes>10.0;490.0;180.0;490.0;180.0;10.0;210.0;10.0</additional_attributes>
+  </element>
+  <element>
+    <id>UMLClass</id>
+    <coordinates>
+      <x>1000</x>
+      <y>355</y>
+      <w>160</w>
+      <h>155</h>
+    </coordinates>
+    <panel_attributes>template=P,C
+&lt;&lt;interface&gt;&gt;
+BackTracking
+--
++ firstDecisonPoint():P
++ nextDecisionPoint(point:P):P
++ lastDecisionPoint():P
++ firstChoice(point:P):C
++ nextChoice(choice:C):C
++ lastChoice(choice:C):C
++ assignable(choice:C, point:P):boolean
++ assign(choice:C, point:P):void
++ deassign(choice:C, point:P):void
++ previousDecisionPoint(point:P)
++ lastChoiceAssignedTo(point:P):C
++ writeSolution(nSol:int):void
++ solve():void
++ solve(maxSolutions:int):void</panel_attributes>
+    <additional_attributes/>
+  </element>
+  <element>
+    <id>UMLClass</id>
+    <coordinates>
+      <x>925</x>
+      <y>435</y>
+      <w>50</w>
+      <h>30</h>
+    </coordinates>
+    <panel_attributes>&lt;&lt;interface&gt;&gt;
+Memento
+--
+--</panel_attributes>
+    <additional_attributes/>
+  </element>
+  <element>
+    <id>Relation</id>
+    <coordinates>
+      <x>890</x>
+      <y>360</y>
+      <w>120</w>
+      <h>25</h>
+    </coordinates>
+    <panel_attributes>lt=&lt;&lt;.
+&lt;&lt;bind&gt;&gt;
+&lt;P::Square, C::Integer&gt;</panel_attributes>
+    <additional_attributes>220.0;20.0;10.0;20.0</additional_attributes>
+  </element>
+  <element>
+    <id>Relation</id>
+    <coordinates>
+      <x>890</x>
+      <y>385</y>
+      <w>70</w>
+      <h>60</h>
+    </coordinates>
+    <panel_attributes>lt=&lt;&lt;.</panel_attributes>
+    <additional_attributes>120.0;100.0;120.0;10.0;10.0;10.0</additional_attributes>
+  </element>
+  <element>
+    <id>UMLClass</id>
+    <coordinates>
+      <x>950</x>
+      <y>220</y>
+      <w>75</w>
+      <h>55</h>
+    </coordinates>
+    <panel_attributes>&lt;&lt;enumeration&gt;&gt;
+MathOperation
+--
+SUM
+SUBTRACTION
+MULTIPLICATION
+DIVISION</panel_attributes>
+    <additional_attributes/>
+  </element>
+  <element>
+    <id>UMLClass</id>
+    <coordinates>
+      <x>950</x>
+      <y>80</y>
+      <w>170</w>
+      <h>110</h>
+    </coordinates>
+    <panel_attributes>Square
+--
+/- serialVersionUID:long/
+- row:int
+- column:int
+- value:int
+--
++ getRow():int
++ getColumn():int
++ getValue():int
++ setValue(value:int):void
++ toString():String
++ equals(o:Object):boolean
++ hashCode():int
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+</panel_attributes>
+    <additional_attributes/>
+  </element>
+  <element>
+    <id>UMLClass</id>
+    <coordinates>
+      <x>1140</x>
+      <y>80</y>
+      <w>260</w>
+      <h>140</h>
+    </coordinates>
+    <panel_attributes>Cage
+--
+/- serialVersionUID:long/
+- squares:Square[*]
+- result:int
+- operation:MathOperation
+--
+_+ verifyAdjacency(squares:boolean[*]):boolean_
+_- verifyAdjacency(i:int, j:int, remaining:int, squares:boolean[*]):boolean_
++ getSquares():Square[*]
++ getSize():int
++ getResult():int
++ getOperation():MathOperation
++ checkTargetResult():boolean
+- checkTargetresult(i:int):boolean
++ toString():String
++ equals(o:Object):boolean
++ hashCode():int
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+</panel_attributes>
+    <additional_attributes/>
+  </element>
+  <element>
+    <id>UMLClass</id>
+    <coordinates>
+      <x>1100</x>
+      <y>30</y>
+      <w>55</w>
+      <h>20</h>
+    </coordinates>
+    <panel_attributes>&lt;&lt;interface&gt;&gt;
+Serializable</panel_attributes>
+    <additional_attributes/>
+  </element>
+  <element>
+    <id>Relation</id>
+    <coordinates>
+      <x>1120</x>
+      <y>45</y>
+      <w>150</w>
+      <h>45</h>
+    </coordinates>
+    <panel_attributes>lt=&lt;&lt;.</panel_attributes>
+    <additional_attributes>10.0;10.0;10.0;40.0;280.0;40.0;280.0;70.0</additional_attributes>
+  </element>
+  <element>
+    <id>Relation</id>
+    <coordinates>
+      <x>1025</x>
+      <y>45</y>
+      <w>110</w>
+      <h>45</h>
+    </coordinates>
+    <panel_attributes>lt=&lt;&lt;.</panel_attributes>
+    <additional_attributes>200.0;10.0;200.0;40.0;10.0;40.0;10.0;70.0</additional_attributes>
+  </element>
+  <element>
+    <id>UMLClass</id>
+    <coordinates>
+      <x>950</x>
+      <y>300</y>
+      <w>110</w>
+      <h>15</h>
+    </coordinates>
+    <panel_attributes>SolutionsNotFoundException</panel_attributes>
+    <additional_attributes/>
+  </element>
+  <element>
+    <id>UMLClass</id>
+    <coordinates>
+      <x>1090</x>
+      <y>300</y>
+      <w>75</w>
+      <h>15</h>
+    </coordinates>
+    <panel_attributes>RuntimeException</panel_attributes>
+    <additional_attributes/>
+  </element>
+  <element>
+    <id>Relation</id>
+    <coordinates>
+      <x>1055</x>
+      <y>300</y>
+      <w>45</w>
+      <h>15</h>
+    </coordinates>
+    <panel_attributes>lt=&lt;&lt;-</panel_attributes>
+    <additional_attributes>70.0;10.0;10.0;10.0</additional_attributes>
+  </element>
+  <element>
+    <id>UMLClass</id>
+    <coordinates>
+      <x>415</x>
+      <y>415</y>
+      <w>125</w>
+      <h>35</h>
+    </coordinates>
+    <panel_attributes>&lt;&lt;interface&gt;&gt;
+GridListener
+--
++ gridChanged(e:GridEvent):void</panel_attributes>
+    <additional_attributes/>
+  </element>
+  <element>
+    <id>UMLClass</id>
+    <coordinates>
+      <x>265</x>
+      <y>545</y>
+      <w>170</w>
+      <h>165</h>
+    </coordinates>
+    <panel_attributes>ControllerPanel
+--
+- gridPanel:GridPanel
+- undo:JButton
+- redo:JButton
+- createCageButton:JButton
+- startGameButton:JButton
+- checkConstraintsButton:JButton
+- clearGridButton:JButton
+- showSolutionsButton:JButton
+- previousSolutionButton:JButton
+- nextSolutionButton:JButton
+- gameStarted:boolean
+--
++ setCreateCageButton(b:boolean):void
++ setStartGameButton(b:boolean):void
++ setCheckConstraintsButton(b:boolean):void
++ setClearGridButton(b:boolean):void
++ setShowSolutionsButton(b:boolean):void
++ gridChanged(e:GridEvent):void</panel_attributes>
+    <additional_attributes/>
+  </element>
+  <element>
+    <id>UMLClass</id>
+    <coordinates>
+      <x>500</x>
+      <y>545</y>
+      <w>315</w>
+      <h>220</h>
+    </coordinates>
+    <panel_attributes>GridPanel
+--
+- commandHandler:CommandHandler
+- gridSize:int
+- buttonGrid:JToggleButton[*]
+- inputGrid:JTextField[*]
+--
++ gridChanged(e:GridEvent):void
++ startGameView():void
++ getSelectedSquares():boolean[*]
++ getLockedSquares():int
++ getTargetResultInput():int
++ getOperationInput():MathOperation
++ getFilePathInput():String
++ getMaxSolutionsInput():int
++ showErrorDialog(title:String, message:String):void
++ showNewGameDialog():boolean
+- rebuildGrid(grid:GridInterface, n:int):void
+- repaintCageSchema(cageSchema:Cage[*], n:int):void
+- paintButtonBorders(button:JToggleButton, i:int, j:int, selectedSquares:boolean[*]):void
+- paintCageTargetResult(result:int, operation:MathOperation, i:int, j:int):void
+- resetSelection():void
+
+{innerclass
+InputFilter
+--
+- gridSize:int
+--
++ InputFilter(gridSize:int):void
++ replace(fb:FilterBypass, offset:int, length:int, text:String, attr:AttributSet):void
+innerclass}</panel_attributes>
+    <additional_attributes/>
+  </element>
+  <element>
+    <id>Relation</id>
+    <coordinates>
+      <x>385</x>
+      <y>445</y>
+      <w>100</w>
+      <h>110</h>
+    </coordinates>
+    <panel_attributes>lt=&lt;&lt;.</panel_attributes>
+    <additional_attributes>180.0;10.0;180.0;60.0;10.0;60.0;10.0;200.0</additional_attributes>
+  </element>
+  <element>
+    <id>Relation</id>
+    <coordinates>
+      <x>470</x>
+      <y>445</y>
+      <w>205</w>
+      <h>110</h>
+    </coordinates>
+    <panel_attributes>lt=&lt;&lt;.</panel_attributes>
+    <additional_attributes>10.0;10.0;10.0;60.0;390.0;60.0;390.0;200.0</additional_attributes>
+  </element>
+  <element>
+    <id>UMLClass</id>
+    <coordinates>
+      <x>455</x>
+      <y>490</y>
+      <w>50</w>
+      <h>15</h>
+    </coordinates>
+    <panel_attributes>JPanel</panel_attributes>
+    <additional_attributes/>
+  </element>
+  <element>
+    <id>Relation</id>
+    <coordinates>
+      <x>500</x>
+      <y>490</y>
+      <w>150</w>
+      <h>65</h>
+    </coordinates>
+    <panel_attributes>lt=&lt;&lt;-</panel_attributes>
+    <additional_attributes>10.0;10.0;280.0;10.0;280.0;110.0</additional_attributes>
+  </element>
+  <element>
+    <id>Relation</id>
+    <coordinates>
+      <x>410</x>
+      <y>490</y>
+      <w>55</w>
+      <h>65</h>
+    </coordinates>
+    <panel_attributes>lt=&lt;&lt;-</panel_attributes>
+    <additional_attributes>90.0;10.0;10.0;10.0;10.0;110.0</additional_attributes>
+  </element>
+  <element>
+    <id>UMLClass</id>
+    <coordinates>
+      <x>1175</x>
+      <y>235</y>
+      <w>160</w>
+      <h>290</h>
+    </coordinates>
+    <panel_attributes>GridEvent
+--
+- source:Grid
+- newGrid:boolean
+- schemaUpdated:boolean
+- cageCleared:boolean
+- constraintChecked:boolean
+- numberInserted:boolean
+- solutionRequested:boolean
+--
+- GridEvent(builder:Builder):void
++ isNewGrid():boolean
++ isSchemaUpdated():boolean
++ isCageCleared():boolean
++ isConstraintChecked():boolean
++ isNumberInserted():boolean
++ isSolutionRequested():boolean
++ getSource():Grid
+
+{innerclass
+Builder
+--
+- source:Grid
+- newGrid:boolean = false
+- schemaUpdated:boolean = false
+- cageCleared:boolean = false
+- constraintChecked:boolean = false
+- numberInserted:boolean = false
+- solutionRequested:boolean = false
+--
++ Builder(grid:Grid):void
++ newGrid(b:boolean):Builder
++ schemaUpdated(b:boolean):Builder
++ cageCleared(b:boolean):Builder
++ constraintChecked(b:boolean):Builder
++ numberInserted(b:boolean):Builder
++ solutionRequested(b:boolean):Builder
++ build():GridEvent
+innerclass}
+
+
+
+
+
+
+
+
+
+
+
+</panel_attributes>
+    <additional_attributes/>
+  </element>
+  <element>
+    <id>UMLClass</id>
+    <coordinates>
+      <x>1050</x>
+      <y>595</y>
+      <w>75</w>
+      <h>40</h>
+    </coordinates>
+    <panel_attributes>&lt;&lt;interface&gt;&gt;
+Command
+--
++ doIt():boolean
++ undoIt(): boolean</panel_attributes>
+    <additional_attributes/>
+  </element>
+  <element>
+    <id>UMLClass</id>
+    <coordinates>
+      <x>1150</x>
+      <y>595</y>
+      <w>135</w>
+      <h>35</h>
+    </coordinates>
+    <panel_attributes>&lt;&lt;interface&gt;&gt;
+CommandHandler
+--
++ handle(command:Command):void</panel_attributes>
+    <additional_attributes/>
+  </element>
+  <element>
+    <id>UMLClass</id>
+    <coordinates>
+      <x>1120</x>
+      <y>660</y>
+      <w>200</w>
+      <h>150</h>
+    </coordinates>
+    <panel_attributes>HistoryCommandHandler
+--
+- maxHistoryLength:int = 100
+- history:Command[*]
+- redoList:Command[*]
+--
++ HistoryCommandHandler(maxHistoryLength:int):void
++ handle(cmd:Command):void
+- redo():void
+- undo():void
+- addToHistory(cmd:Command)
+
+{innerclass
+&lt;&lt;enumeration&gt;&gt;
+NonExecutableCommands
+--
+UNDO
+REDO
+--
++ doIt():boolean
++ undoIt():boolean
+innerclass}</panel_attributes>
+    <additional_attributes/>
+  </element>
+  <element>
+    <id>Relation</id>
+    <coordinates>
+      <x>1180</x>
+      <y>625</y>
+      <w>15</w>
+      <h>45</h>
+    </coordinates>
+    <panel_attributes>lt=&lt;&lt;.</panel_attributes>
+    <additional_attributes>10.0;10.0;10.0;70.0</additional_attributes>
+  </element>
+  <element>
+    <id>Relation</id>
+    <coordinates>
+      <x>1080</x>
+      <y>630</y>
+      <w>55</w>
+      <h>135</h>
+    </coordinates>
+    <panel_attributes>lt=&lt;&lt;.</panel_attributes>
+    <additional_attributes>10.0;10.0;10.0;250.0;90.0;250.0</additional_attributes>
+  </element>
+  <element>
+    <id>UMLClass</id>
+    <coordinates>
+      <x>865</x>
+      <y>575</y>
+      <w>125</w>
+      <h>60</h>
+    </coordinates>
+    <panel_attributes>SaveGameCommand
+--
+- grid:GridInterface
+- gridPanel:GridPanel
+- n:int
+--
++ doIt():boolean
++ undoIt(): boolean</panel_attributes>
+    <additional_attributes/>
+  </element>
+  <element>
+    <id>UMLClass</id>
+    <coordinates>
+      <x>865</x>
+      <y>645</y>
+      <w>125</w>
+      <h>60</h>
+    </coordinates>
+    <panel_attributes>ShowSolutionsCommand
+--
+- grid:GridInterface
+- gridPanel:GridPanel
+- gridMemento:Memento
+--
++ doIt():boolean
++ undoIt(): boolean</panel_attributes>
+    <additional_attributes/>
+  </element>
+  <element>
+    <id>UMLClass</id>
+    <coordinates>
+      <x>865</x>
+      <y>715</y>
+      <w>125</w>
+      <h>75</h>
+    </coordinates>
+    <panel_attributes>LoadGameCommand
+--
+- grid:GridInterface
+- gridPanel:GridPanel
+- controllerPanel:ControllerPanel
+- n:int
+--
++ doIt():boolean
++ undoIt(): boolean</panel_attributes>
+    <additional_attributes/>
+  </element>
+  <element>
+    <id>UMLClass</id>
+    <coordinates>
+      <x>865</x>
+      <y>800</y>
+      <w>125</w>
+      <h>65</h>
+    </coordinates>
+    <panel_attributes>CreateGridCommand
+--
+- grid:GridInterface
+- gridPanel:GridPanel
+- controllerPanel:ControllerPanel
+- n:int
+--
++ doIt():boolean
++ undoIt(): boolean</panel_attributes>
+    <additional_attributes/>
+  </element>
+  <element>
+    <id>UMLClass</id>
+    <coordinates>
+      <x>865</x>
+      <y>875</y>
+      <w>125</w>
+      <h>75</h>
+    </coordinates>
+    <panel_attributes>InsertNumberCommand
+--
+- grid:GridInterface
+- row:int
+- column:int
+- number:int
+- gridMemento:Memento
+--
++ doIt():boolean
++ undoIt(): boolean</panel_attributes>
+    <additional_attributes/>
+  </element>
+  <element>
+    <id>UMLClass</id>
+    <coordinates>
+      <x>1055</x>
+      <y>860</y>
+      <w>125</w>
+      <h>75</h>
+    </coordinates>
+    <panel_attributes>CreateCageCommand
+--
+- grid:GridInterface
+- selectedSquares:Square[*]
+- result:int
+- operation:MathOperation
+- gridMemento:Memento
+--
++ doIt():boolean
++ undoIt(): boolean</panel_attributes>
+    <additional_attributes/>
+  </element>
+  <element>
+    <id>UMLClass</id>
+    <coordinates>
+      <x>1330</x>
+      <y>780</y>
+      <w>125</w>
+      <h>40</h>
+    </coordinates>
+    <panel_attributes>NavigateSolutionsCommand
+--
+- grid:GridInterface
+- i:int
+--
++ doIt():boolean
++ undoIt(): boolean</panel_attributes>
+    <additional_attributes/>
+  </element>
+  <element>
+    <id>UMLClass</id>
+    <coordinates>
+      <x>1330</x>
+      <y>860</y>
+      <w>125</w>
+      <h>50</h>
+    </coordinates>
+    <panel_attributes>CheckConstraintsCommand
+--
+- grid:GridInterface
+--
++ doIt():boolean
++ undoIt(): boolean</panel_attributes>
+    <additional_attributes/>
+  </element>
+  <element>
+    <id>UMLClass</id>
+    <coordinates>
+      <x>1190</x>
+      <y>860</y>
+      <w>125</w>
+      <h>50</h>
+    </coordinates>
+    <panel_attributes>ClearGridCommand
+--
+- grid:GridInterface
+- gridMemento:Memento
+--
++ doIt():boolean
++ undoIt(): boolean</panel_attributes>
+    <additional_attributes/>
+  </element>
+  <element>
+    <id>Relation</id>
+    <coordinates>
+      <x>985</x>
+      <y>580</y>
+      <w>75</w>
+      <h>30</h>
+    </coordinates>
+    <panel_attributes>lt=&lt;&lt;.</panel_attributes>
+    <additional_attributes>130.0;40.0;80.0;40.0;80.0;10.0;10.0;10.0</additional_attributes>
+  </element>
+  <element>
+    <id>Relation</id>
+    <coordinates>
+      <x>985</x>
+      <y>595</y>
+      <w>75</w>
+      <h>65</h>
+    </coordinates>
+    <panel_attributes>lt=&lt;&lt;.</panel_attributes>
+    <additional_attributes>130.0;10.0;80.0;10.0;80.0;110.0;10.0;110.0</additional_attributes>
+  </element>
+  <element>
+    <id>Relation</id>
+    <coordinates>
+      <x>985</x>
+      <y>595</y>
+      <w>75</w>
+      <h>135</h>
+    </coordinates>
+    <panel_attributes>lt=&lt;&lt;.</panel_attributes>
+    <additional_attributes>130.0;10.0;80.0;10.0;80.0;250.0;10.0;250.0</additional_attributes>
+  </element>
+  <element>
+    <id>Relation</id>
+    <coordinates>
+      <x>985</x>
+      <y>595</y>
+      <w>75</w>
+      <h>220</h>
+    </coordinates>
+    <panel_attributes>lt=&lt;&lt;.</panel_attributes>
+    <additional_attributes>130.0;10.0;80.0;10.0;80.0;420.0;10.0;420.0</additional_attributes>
+  </element>
+  <element>
+    <id>Relation</id>
+    <coordinates>
+      <x>1020</x>
+      <y>595</y>
+      <w>365</w>
+      <h>250</h>
+    </coordinates>
+    <panel_attributes>lt=&lt;&lt;.</panel_attributes>
+    <additional_attributes>60.0;10.0;10.0;10.0;10.0;480.0;710.0;480.0;710.0;450.0</additional_attributes>
+  </element>
+  <element>
+    <id>Relation</id>
+    <coordinates>
+      <x>985</x>
+      <y>595</y>
+      <w>75</w>
+      <h>300</h>
+    </coordinates>
+    <panel_attributes>lt=&lt;&lt;.</panel_attributes>
+    <additional_attributes>130.0;10.0;80.0;10.0;80.0;580.0;10.0;580.0</additional_attributes>
+  </element>
+  <element>
+    <id>Relation</id>
+    <coordinates>
+      <x>1020</x>
+      <y>595</y>
+      <w>80</w>
+      <h>275</h>
+    </coordinates>
+    <panel_attributes>lt=&lt;&lt;.</panel_attributes>
+    <additional_attributes>60.0;10.0;10.0;10.0;10.0;480.0;140.0;480.0;140.0;530.0</additional_attributes>
+  </element>
+  <element>
+    <id>Relation</id>
+    <coordinates>
+      <x>1020</x>
+      <y>595</y>
+      <w>205</w>
+      <h>275</h>
+    </coordinates>
+    <panel_attributes>lt=&lt;&lt;.</panel_attributes>
+    <additional_attributes>60.0;10.0;10.0;10.0;10.0;480.0;390.0;480.0;390.0;530.0</additional_attributes>
+  </element>
+  <element>
+    <id>Relation</id>
+    <coordinates>
+      <x>1020</x>
+      <y>595</y>
+      <w>340</w>
+      <h>275</h>
+    </coordinates>
+    <panel_attributes>lt=&lt;&lt;.</panel_attributes>
+    <additional_attributes>60.0;10.0;10.0;10.0;10.0;480.0;660.0;480.0;660.0;530.0</additional_attributes>
+  </element>
+  <element>
+    <id>Relation</id>
+    <coordinates>
+      <x>545</x>
+      <y>0</y>
+      <w>455</w>
+      <h>90</h>
+    </coordinates>
+    <panel_attributes>lt=&lt;.
+&lt;&lt;use&gt;&gt;</panel_attributes>
+    <additional_attributes>890.0;160.0;890.0;20.0;10.0;20.0;10.0;120.0</additional_attributes>
+  </element>
+  <element>
+    <id>Relation</id>
+    <coordinates>
+      <x>545</x>
+      <y>5</y>
+      <w>770</w>
+      <h>85</h>
+    </coordinates>
+    <panel_attributes>lt=&lt;.</panel_attributes>
+    <additional_attributes>1520.0;150.0;1520.0;10.0;10.0;10.0;10.0;110.0</additional_attributes>
+  </element>
+  <element>
+    <id>Relation</id>
+    <coordinates>
+      <x>545</x>
+      <y>5</y>
+      <w>415</w>
+      <h>235</h>
+    </coordinates>
+    <panel_attributes>lt=&lt;.</panel_attributes>
+    <additional_attributes>810.0;450.0;780.0;450.0;780.0;10.0;10.0;10.0;10.0;110.0</additional_attributes>
+  </element>
+  <element>
+    <id>Relation</id>
+    <coordinates>
+      <x>575</x>
+      <y>35</y>
+      <w>385</w>
+      <h>285</h>
+    </coordinates>
+    <panel_attributes>lt=&lt;.
+</panel_attributes>
+    <additional_attributes>750.0;550.0;690.0;550.0;690.0;10.0;10.0;10.0;10.0;50.0</additional_attributes>
+  </element>
+  <element>
+    <id>Relation</id>
+    <coordinates>
+      <x>810</x>
+      <y>215</y>
+      <w>600</w>
+      <h>350</h>
+    </coordinates>
+    <panel_attributes>lt=&lt;.
+&lt;&lt;call&gt;&gt;</panel_attributes>
+    <additional_attributes>1140.0;10.0;1140.0;680.0;10.0;680.0</additional_attributes>
+  </element>
+  <element>
+    <id>UMLClass</id>
+    <coordinates>
+      <x>290</x>
+      <y>750</y>
+      <w>50</w>
+      <h>15</h>
+    </coordinates>
+    <panel_attributes>JButton</panel_attributes>
+    <additional_attributes/>
+  </element>
+  <element>
+    <id>UMLClass</id>
+    <coordinates>
+      <x>355</x>
+      <y>750</y>
+      <w>55</w>
+      <h>15</h>
+    </coordinates>
+    <panel_attributes>JToggleButton</panel_attributes>
+    <additional_attributes/>
+  </element>
+  <element>
+    <id>UMLClass</id>
+    <coordinates>
+      <x>425</x>
+      <y>750</y>
+      <w>55</w>
+      <h>15</h>
+    </coordinates>
+    <panel_attributes>JTextField</panel_attributes>
+    <additional_attributes/>
+  </element>
+  <element>
+    <id>Relation</id>
+    <coordinates>
+      <x>315</x>
+      <y>705</y>
+      <w>25</w>
+      <h>55</h>
+    </coordinates>
+    <panel_attributes>lt=&lt;&lt;&lt;&lt;&lt;-
+m1=1
+m2=1..*</panel_attributes>
+    <additional_attributes>10.0;10.0;10.0;90.0</additional_attributes>
+  </element>
+  <element>
+    <id>Relation</id>
+    <coordinates>
+      <x>385</x>
+      <y>545</y>
+      <w>125</w>
+      <h>215</h>
+    </coordinates>
+    <panel_attributes>lt=&lt;&lt;&lt;&lt;&lt;-
+m2=1..*</panel_attributes>
+    <additional_attributes>230.0;10.0;160.0;10.0;160.0;370.0;10.0;370.0;10.0;410.0</additional_attributes>
+  </element>
+  <element>
+    <id>Relation</id>
+    <coordinates>
+      <x>460</x>
+      <y>545</y>
+      <w>50</w>
+      <h>215</h>
+    </coordinates>
+    <panel_attributes>lt=&lt;&lt;&lt;&lt;&lt;-
+m1=1
+m2=1..*</panel_attributes>
+    <additional_attributes>80.0;10.0;10.0;10.0;10.0;410.0</additional_attributes>
+  </element>
+  <element>
+    <id>Relation</id>
+    <coordinates>
+      <x>355</x>
+      <y>260</y>
+      <w>15</w>
+      <h>295</h>
+    </coordinates>
+    <panel_attributes>lt=&lt;.</panel_attributes>
+    <additional_attributes>10.0;10.0;10.0;570.0</additional_attributes>
+  </element>
+  <element>
+    <id>Relation</id>
+    <coordinates>
+      <x>355</x>
+      <y>260</y>
+      <w>370</w>
+      <h>295</h>
+    </coordinates>
+    <panel_attributes>lt=&lt;.
+&lt;&lt;use&gt;&gt;</panel_attributes>
+    <additional_attributes>10.0;10.0;10.0;230.0;400.0;230.0;400.0;400.0;720.0;400.0;720.0;570.0</additional_attributes>
+  </element>
+  <element>
+    <id>Relation</id>
+    <coordinates>
+      <x>535</x>
+      <y>330</y>
+      <w>650</w>
+      <h>200</h>
+    </coordinates>
+    <panel_attributes>lt=&lt;.
+&lt;&lt;create&gt;&gt;</panel_attributes>
+    <additional_attributes>1280.0;380.0;700.0;380.0;700.0;230.0;170.0;230.0;170.0;10.0;10.0;10.0</additional_attributes>
+  </element>
+  <element>
+    <id>Relation</id>
+    <coordinates>
+      <x>235</x>
+      <y>245</y>
+      <w>640</w>
+      <h>650</h>
+    </coordinates>
+    <panel_attributes>lt=&lt;.
+&lt;&lt;call&gt;&gt;</panel_attributes>
+    <additional_attributes>220.0;10.0;20.0;10.0;10.0;1280.0;1200.0;1280.0;1200.0;690.0;1260.0;690.0</additional_attributes>
+  </element>
+  <element>
+    <id>Relation</id>
+    <coordinates>
+      <x>235</x>
+      <y>245</y>
+      <w>640</w>
+      <h>650</h>
+    </coordinates>
+    <panel_attributes>lt=&lt;.</panel_attributes>
+    <additional_attributes>220.0;10.0;20.0;10.0;10.0;1280.0;1200.0;1280.0;1200.0;810.0;1260.0;810.0</additional_attributes>
+  </element>
+  <element>
+    <id>Relation</id>
+    <coordinates>
+      <x>235</x>
+      <y>245</y>
+      <w>640</w>
+      <h>650</h>
+    </coordinates>
+    <panel_attributes>lt=&lt;.</panel_attributes>
+    <additional_attributes>220.0;10.0;20.0;10.0;10.0;1280.0;1200.0;1280.0;1200.0;950.0;1260.0;950.0</additional_attributes>
+  </element>
+  <element>
+    <id>Relation</id>
+    <coordinates>
+      <x>235</x>
+      <y>245</y>
+      <w>640</w>
+      <h>650</h>
+    </coordinates>
+    <panel_attributes>lt=&lt;.</panel_attributes>
+    <additional_attributes>220.0;10.0;20.0;10.0;10.0;1280.0;1200.0;1280.0;1200.0;1120.0;1260.0;1120.0</additional_attributes>
+  </element>
+  <element>
+    <id>Relation</id>
+    <coordinates>
+      <x>235</x>
+      <y>245</y>
+      <w>640</w>
+      <h>650</h>
+    </coordinates>
+    <panel_attributes>lt=&lt;.</panel_attributes>
+    <additional_attributes>220.0;10.0;20.0;10.0;10.0;1280.0;1260.0;1280.0</additional_attributes>
+  </element>
+  <element>
+    <id>Relation</id>
+    <coordinates>
+      <x>235</x>
+      <y>245</y>
+      <w>860</w>
+      <h>730</h>
+    </coordinates>
+    <panel_attributes>lt=&lt;.</panel_attributes>
+    <additional_attributes>220.0;10.0;20.0;10.0;10.0;1280.0;1100.0;1280.0;1100.0;1440.0;1700.0;1440.0;1700.0;1380.0</additional_attributes>
+  </element>
+  <element>
+    <id>Relation</id>
+    <coordinates>
+      <x>235</x>
+      <y>245</y>
+      <w>990</w>
+      <h>730</h>
+    </coordinates>
+    <panel_attributes>lt=&lt;.</panel_attributes>
+    <additional_attributes>220.0;10.0;20.0;10.0;10.0;1280.0;1100.0;1280.0;1100.0;1440.0;1960.0;1440.0;1960.0;1330.0</additional_attributes>
+  </element>
+  <element>
+    <id>Relation</id>
+    <coordinates>
+      <x>235</x>
+      <y>245</y>
+      <w>1125</w>
+      <h>730</h>
+    </coordinates>
+    <panel_attributes>lt=&lt;.</panel_attributes>
+    <additional_attributes>220.0;10.0;20.0;10.0;10.0;1280.0;1100.0;1280.0;1100.0;1440.0;2230.0;1440.0;2230.0;1330.0</additional_attributes>
+  </element>
+  <element>
+    <id>Relation</id>
+    <coordinates>
+      <x>810</x>
+      <y>570</y>
+      <w>65</w>
+      <h>20</h>
+    </coordinates>
+    <panel_attributes>lt=&lt;.
+&lt;&lt;call&gt;&gt;</panel_attributes>
+    <additional_attributes>10.0;20.0;110.0;20.0</additional_attributes>
+  </element>
+  <element>
+    <id>Relation</id>
+    <coordinates>
+      <x>810</x>
+      <y>575</y>
+      <w>65</w>
+      <h>95</h>
+    </coordinates>
+    <panel_attributes>lt=&lt;.</panel_attributes>
+    <additional_attributes>10.0;10.0;30.0;10.0;30.0;170.0;110.0;170.0</additional_attributes>
+  </element>
+  <element>
+    <id>Relation</id>
+    <coordinates>
+      <x>810</x>
+      <y>575</y>
+      <w>65</w>
+      <h>165</h>
+    </coordinates>
+    <panel_attributes>lt=&lt;.</panel_attributes>
+    <additional_attributes>10.0;10.0;30.0;10.0;30.0;310.0;110.0;310.0</additional_attributes>
+  </element>
+  <element>
+    <id>Relation</id>
+    <coordinates>
+      <x>810</x>
+      <y>575</y>
+      <w>65</w>
+      <h>250</h>
+    </coordinates>
+    <panel_attributes>lt=&lt;.</panel_attributes>
+    <additional_attributes>10.0;10.0;30.0;10.0;30.0;480.0;110.0;480.0</additional_attributes>
+  </element>
+  <element>
+    <id>Relation</id>
+    <coordinates>
+      <x>810</x>
+      <y>575</y>
+      <w>65</w>
+      <h>330</h>
+    </coordinates>
+    <panel_attributes>lt=&lt;.</panel_attributes>
+    <additional_attributes>10.0;10.0;30.0;10.0;30.0;640.0;110.0;640.0</additional_attributes>
+  </element>
+  <element>
+    <id>Relation</id>
+    <coordinates>
+      <x>265</x>
+      <y>705</y>
+      <w>615</w>
+      <h>85</h>
+    </coordinates>
+    <panel_attributes>lt=&lt;.
+&lt;&lt;call&gt;&gt;</panel_attributes>
+    <additional_attributes>10.0;10.0;10.0;150.0;1210.0;150.0</additional_attributes>
+  </element>
+  <element>
+    <id>Relation</id>
+    <coordinates>
+      <x>265</x>
+      <y>705</y>
+      <w>610</w>
+      <h>160</h>
+    </coordinates>
+    <panel_attributes>lt=&lt;.
+</panel_attributes>
+    <additional_attributes>10.0;10.0;10.0;150.0;990.0;150.0;990.0;300.0;1200.0;300.0</additional_attributes>
+  </element>
+  <element>
+    <id>Relation</id>
+    <coordinates>
+      <x>765</x>
+      <y>520</y>
+      <w>500</w>
+      <h>35</h>
+    </coordinates>
+    <panel_attributes>lt=&lt;.
+&lt;&lt;call&gt;&gt;</panel_attributes>
+    <additional_attributes>980.0;10.0;980.0;30.0;10.0;30.0;10.0;50.0</additional_attributes>
+  </element>
+  <element>
+    <id>Relation</id>
+    <coordinates>
+      <x>425</x>
+      <y>520</y>
+      <w>840</w>
+      <h>35</h>
+    </coordinates>
+    <panel_attributes>lt=&lt;.</panel_attributes>
+    <additional_attributes>1660.0;10.0;1660.0;30.0;10.0;30.0;10.0;50.0</additional_attributes>
+  </element>
+</diagram>

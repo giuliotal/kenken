@@ -1,73 +1,73 @@
 package mvc.model;
 
-public interface Backtracking<P,S> {
+public interface Backtracking<P, C> {
 
-    P primoPuntoDiScelta();
+    P firstDecisonPoint();
 
-    P prossimoPuntoDiScelta(P ps);
+    P nextDecisionPoint(P point);
 
-    P ultimoPuntoDiScelta();
+    P lastDecisionPoint();
 
-    S primaScelta(P ps);
+    C firstChoice(P point);
 
-    S prossimaScelta(S s);
+    C nextChoice(C choice);
 
-    S ultimaScelta(P ps);
+    C lastChoice(P point);
 
-    boolean assegnabile(S scelta, P puntoDiScelta);
+    boolean assignable(C choice, P point);
 
-    void assegna(S scelta, P puntoDiScelta);
+    void assign(C choice, P point);
 
-    void deassegna(S scelta, P puntoDiScelta);
+    void deassign(C choice, P point);
 
-    P precedentePuntoDiScelta(P puntoDiScelta);
+    P previousDecisionPoint(P point);
 
-    S ultimaSceltaAssegnataA(P puntoDiScelta);
+    C lastChoiceAssignedTo(P point);
 
-    void scriviSoluzione(int nr_sol);
+    void writeSolution(int nSol);
 
-    default  void risolvi(){
-        risolvi(Integer.MAX_VALUE);
+    default  void solve(){
+        solve(Integer.MAX_VALUE);
     }
 
-    default void risolvi(int num_max_soluzioni) { // template method
+    default void solve(int maxSolutions) { // template method
         int nr_soluzione = 0;
-        P ps = primoPuntoDiScelta();
-        S s = primaScelta(ps);
+        P ps = firstDecisonPoint();
+        C c = firstChoice(ps);
         boolean backtrack = false, fine = false;
         do {
             // forward
-            while (!backtrack && nr_soluzione < num_max_soluzioni) {
-                if (assegnabile(s, ps)) {
-                    assegna(s, ps);
-                    if (ps.equals(ultimoPuntoDiScelta())) {
+            while (!backtrack && nr_soluzione < maxSolutions) {
+                if (assignable(c, ps)) {
+                    assign(c, ps);
+                    if (ps.equals(lastDecisionPoint())) {
                         ++nr_soluzione;
-                        scriviSoluzione(nr_soluzione);
-                        deassegna(s, ps);
-                        if (!s.equals(ultimaScelta(ps)))
-                            s = prossimaScelta(s);
+                        writeSolution(nr_soluzione);
+                        deassign(c, ps);
+                        if (!c.equals(lastChoice(ps)))
+                            c = nextChoice(c);
                         else
                             backtrack = true;
                     } else {
-                        ps = prossimoPuntoDiScelta(ps);
-                        s = primaScelta(ps);
+                        ps = nextDecisionPoint(ps);
+                        c = firstChoice(ps);
                     }
-                } else if (!s.equals(ultimaScelta(ps)))
-                    s = prossimaScelta(s);
+                } else if (!c.equals(lastChoice(ps)))
+                    c = nextChoice(c);
                 else
                     backtrack = true;
             }// while( !backtrack ... )
             // backward
-            fine = ps.equals(primoPuntoDiScelta())
-                    || nr_soluzione == num_max_soluzioni;
+            fine = ps.equals(firstDecisonPoint())
+                    || nr_soluzione == maxSolutions;
             while (backtrack && !fine) {
-                ps = precedentePuntoDiScelta(ps);
-                s = ultimaSceltaAssegnataA(ps);
-                deassegna(s, ps);
-                if (!s.equals(ultimaScelta(ps))) {
-                    s = prossimaScelta(s);
+                ps = previousDecisionPoint(ps);
+                c = lastChoiceAssignedTo(ps);
+                deassign(c, ps);
+                if (!c.equals(lastChoice(ps))) {
+                    c = nextChoice(c);
                     backtrack = false;
-                } else if (ps.equals(primoPuntoDiScelta()))
+                } else if (ps.equals(firstDecisonPoint()))
                     fine = true;
             }
         } while (!fine);

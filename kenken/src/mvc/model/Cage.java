@@ -29,8 +29,8 @@ public class Cage implements Serializable {
 
     public MathOperation getOperation() {return operation;}
 
-    private <T> void swap(T[] a, int i, int j) {
-        T tmp = a[i];
+    private void swap(Square[] a, int i, int j) {
+        Square tmp = a[i];
         a[i] = a[j];
         a[j] = tmp;
     }
@@ -145,10 +145,10 @@ public class Cage implements Serializable {
         final int M = 17;
         int h = 1;
         for(Square s: squares) {
-            h = h * h + s.hashCode();
+            h = h * M + s.hashCode();
         }
-        h = h * h + result;
-        h = h * h + operation.hashCode();
+        h = h * M + result;
+        h = h * M + operation.hashCode();
         return h;
     }
 

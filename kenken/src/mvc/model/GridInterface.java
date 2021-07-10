@@ -2,6 +2,7 @@ package mvc.model;
 
 import mvc.model.exceptions.SolutionsNotFoundException;
 
+import java.util.Collections;
 import java.util.List;
 
 public interface GridInterface {
@@ -29,6 +30,8 @@ public interface GridInterface {
     boolean checkConstraints();
 
     void findSolutions(int maxSolutions) throws SolutionsNotFoundException;
+
+    int getTotalSolutions();
 
     int[][] getCurrentSolution() throws SolutionsNotFoundException;
 

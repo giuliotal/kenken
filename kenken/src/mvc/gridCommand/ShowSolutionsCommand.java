@@ -10,23 +10,23 @@ public class ShowSolutionsCommand implements Command {
 
     private final GridInterface grid;
     private final GridPanel gridPanel;
-    private final int maxSolutions;
     private final Memento gridMemento;
 
-    public ShowSolutionsCommand(GridInterface grid, GridPanel gridPanel, int maxSolutions) {
+    public ShowSolutionsCommand(GridInterface grid, GridPanel gridPanel) {
         this.grid = grid;
         this.gridPanel = gridPanel;
-        this.maxSolutions = maxSolutions;
         this.gridMemento = grid.getMemento();
     }
 
     @Override
     public boolean doIt() {
-        if(maxSolutions == -1) return false;
+        int maxSolutions = gridPanel.getMaxSolutionsInput();
+        if(maxSolutions == -1) return true;
         try {
             grid.findSolutions(maxSolutions);
         } catch (SolutionsNotFoundException e) {
-            gridPanel.showSolutionsNotFoundDialog();
+            gridPanel.showErrorDialog("Unsolvable game!",
+                    "There are no solutions for this game!");
         }
         return true;
     }

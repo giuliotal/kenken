@@ -1,4 +1,4 @@
 package mvc.model.exceptions;
 
-public class SolutionsNotFoundException extends Exception {
+public class SolutionsNotFoundException extends RuntimeException {
 }

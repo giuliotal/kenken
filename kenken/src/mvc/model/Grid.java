@@ -88,6 +88,7 @@ public class Grid extends AbstractGrid implements Serializable {
     }
 
     public boolean createCage(Square[] squares, int result, MathOperation op) {
+        if(squares.length == 0) throw new IllegalArgumentException();
         boolean[][] selectedSquares = new boolean[n][n];
         for(Square s : squares) selectedSquares[s.getRow()][s.getColumn()] = true;
         if(!Cage.verifyAdjacency(selectedSquares)) throw new IllegalArgumentException("Invalid square selection");
@@ -150,7 +151,7 @@ public class Grid extends AbstractGrid implements Serializable {
         if(solutions.size() != maxSolutions) {
             clear();
             solutions.clear();
-            new KenkenSolutions().risolvi(maxSolutions);
+            new KenkenSolutions().solve(maxSolutions);
         }
         if(solutions.isEmpty()) throw new SolutionsNotFoundException();
         currentSolution = 0;
@@ -237,7 +238,7 @@ public class Grid extends AbstractGrid implements Serializable {
                 square.setValue(s.getValue());
                 squareList.add(square);
             }
-            cageSchema.add(new Cage(squareList.toArray(new Square[squareList.size()]), cage.getResult(), cage.getOperation()));
+            cageSchema.add(new Cage(squareList.toArray(new Square[0]), cage.getResult(), cage.getOperation()));
         }
         notifyListeners(new GridEvent.Builder(this).schemaUpdated(true).build());
     }
@@ -245,14 +246,14 @@ public class Grid extends AbstractGrid implements Serializable {
     private class KenkenSolutions implements Backtracking<Square, Integer> {
 
         @Override
-        public Square primoPuntoDiScelta() {
+        public Square firstDecisonPoint() {
             return squares[0][0];
         }
 
         @Override
-        public Square prossimoPuntoDiScelta(Square ps) {
-            int row = ps.getRow();
-            int column = ps.getColumn();
+        public Square nextDecisionPoint(Square point) {
+            int row = point.getRow();
+            int column = point.getColumn();
             if(column < n-1) column++;
             else if(column == n-1) {
                 row++;
@@ -262,37 +263,37 @@ public class Grid extends AbstractGrid implements Serializable {
         }
 
         @Override
-        public Square ultimoPuntoDiScelta() {
+        public Square lastDecisionPoint() {
             return squares[n-1][n-1];
         }
 
         @Override
-        public Integer primaScelta(Square ps) {
+        public Integer firstChoice(Square point) {
             return 1;
         }
 
         @Override
-        public Integer prossimaScelta(Integer integer) {
-            return integer+1;
+        public Integer nextChoice(Integer choice) {
+            return choice +1;
         }
 
         @Override
-        public Integer ultimaScelta(Square ps) {
+        public Integer lastChoice(Square point) {
             return n;
         }
 
         @Override
-        public boolean assegnabile(Integer scelta, Square puntoDiScelta) {
-            int tmp = puntoDiScelta.getValue(); // memorizzo la scelta corrente
-            puntoDiScelta.setValue(scelta); // assegno temporaneamente la nuova scelta per vedere se rispetta i vincoli
+        public boolean assignable(Integer choice, Square point) {
+            int tmp = point.getValue(); // memorizzo la scelta corrente
+            point.setValue(choice); // assegno temporaneamente la nuova scelta per vedere se rispetta i vincoli
             List<Square> duplicateSquares = findDuplicates();
             if(duplicateSquares.isEmpty()) {
                 // se non ci sono duplicati individuo il blocco di appartenenza della cella corrente e verifico il vincolo aritmetico
                 for(Cage c : cageSchema) {
                     for(Square s : c.getSquares()) {
-                        if(s.equals(puntoDiScelta)) {
+                        if(s.equals(point)) {
                             if(!c.checkTargetResult()) {
-                                puntoDiScelta.setValue(tmp); // ripristino la vecchia griglia
+                                point.setValue(tmp); // ripristino la vecchia griglia
                                 return false;
                             }
                             return true;
@@ -300,24 +301,24 @@ public class Grid extends AbstractGrid implements Serializable {
                     }
                 }
             }
-            puntoDiScelta.setValue(tmp);
+            point.setValue(tmp);
             return false;
         }
 
         @Override
-        public void assegna(Integer scelta, Square puntoDiScelta) {
-            puntoDiScelta.setValue(scelta);
+        public void assign(Integer choice, Square point) {
+            point.setValue(choice);
         }
 
         @Override
-        public void deassegna(Integer scelta, Square puntoDiScelta) {
-            puntoDiScelta.setValue(0);
+        public void deassign(Integer choice, Square point) {
+            point.setValue(0);
         }
 
         @Override
-        public Square precedentePuntoDiScelta(Square puntoDiScelta) {
-            int row = puntoDiScelta.getRow();
-            int column = puntoDiScelta.getColumn();
+        public Square previousDecisionPoint(Square point) {
+            int row = point.getRow();
+            int column = point.getColumn();
             if(column > 0) column--;
             else if(column == 0) {
                 row--;
@@ -327,12 +328,12 @@ public class Grid extends AbstractGrid implements Serializable {
         }
 
         @Override
-        public Integer ultimaSceltaAssegnataA(Square puntoDiScelta) {
-            return puntoDiScelta.getValue();
+        public Integer lastChoiceAssignedTo(Square point) {
+            return point.getValue();
         }
 
         @Override
-        public void scriviSoluzione(int nr_sol) {
+        public void writeSolution(int nSol) {
             int[][] gridCopy = new int[n][n];
             for (int i = 0; i < n; i++) {
                 for (int j = 0; j < n; j++) {
@@ -360,7 +361,7 @@ public class Grid extends AbstractGrid implements Serializable {
                     squares[s.getRow()][s.getColumn()] = s;
                     squareList.add(s);
                 }
-                cageSchema.add(new Cage(squareList.toArray(new Square[squareList.size()]), cage.getResult(), cage.getOperation()));
+                cageSchema.add(new Cage(squareList.toArray(new Square[0]), cage.getResult(), cage.getOperation()));
             }
         }
     }
@@ -396,7 +397,7 @@ public class Grid extends AbstractGrid implements Serializable {
         int h = 1;
         for(Cage c : cageSchema) {
             for(Square s : c.getSquares()) {
-                h = h * h + s.hashCode();
+                h = h * M + s.hashCode();
             }
         }
         return h;

@@ -21,16 +21,12 @@ import java.util.List;
 // Concrete Observer (VIEW)
 public class GridPanel extends JPanel implements GridListener {
 
-    // subject
-    private final GridInterface grid;
     private final CommandHandler commandHandler;
-
     private int gridSize;
     private JToggleButton[][] buttonGrid;
     private JTextField[][] inputGrid;
 
     public GridPanel(GridInterface grid, CommandHandler commandHandler) {
-        this.grid = grid;
         this.gridSize = grid.getSize();
         this.buttonGrid = new JToggleButton[gridSize][gridSize];
         this.inputGrid = new JTextField[gridSize][gridSize];
@@ -39,30 +35,24 @@ public class GridPanel extends JPanel implements GridListener {
     }
 
     @Override
-    protected void paintComponent(Graphics g) {
-        super.paintComponent(g);
-    }
-
-    @Override
     public void gridChanged(GridEvent e) {
-        JFrame mainFrame = (JFrame) SwingUtilities.getWindowAncestor(this);
         int n = e.getSource().getSize();
 
-        if(e.isNewGrid()) {
-            rebuildGrid(n);
+        if(e.isNewGrid()) { //griglia ricostruita o caricata da disco
+            rebuildGrid(e.getSource(),n);
         }
         if(e.isSchemaUpdated()) { // caricamento/ripristino di una griglia di gioco o di un blocco
             repaintCageSchema(e.getSource().getCageSchema(), n);
             resetSelection();
         }
-        if(e.isCageCleared()) {
+        if(e.isCageCleared()) { // cancellazione di tutti gli inserimenti avvenuti nella griglia
             for (int i = 0; i < gridSize; i++) {
                 for (int j = 0; j < gridSize; j++) {
                     inputGrid[i][j].setText("");
                 }
             }
         }
-        if(e.isConstraintChecked()) {
+        if(e.isConstraintChecked()) { // richiesto controllo dei vincoli
             List<Square> duplicateSquares = e.getSource().getDuplicateSquares();
             List<Cage> invalidTargetResultCages = e.getSource().getInvalidTargetResultCages();
             // i numeri duplicati vengono evidenziati in rosso
@@ -91,9 +81,10 @@ public class GridPanel extends JPanel implements GridListener {
                 }
             }
         }
-        if(e.isNumberInserted()) {
+        if(e.isNumberInserted()) { // inserimento di un numero nella griglia
             for (int i = 0; i < gridSize; i++) {
                 for (int j = 0; j < gridSize; j++) {
+                    // riporto la UI al suo stato precedente
                     inputGrid[i][j].setForeground(Color.BLACK);
                     buttonGrid[i][j].setUI(new MetalButtonUI() {
                         protected Color getDisabledTextColor() {
@@ -103,7 +94,7 @@ public class GridPanel extends JPanel implements GridListener {
                 }
             }
         }
-        if(e.isSolutionRequested()) {
+        if(e.isSolutionRequested()) { // visualizza la prima delle soluzioni individuate, se esiste
             try {
                 int[][] currentSolution = e.getSource().getCurrentSolution();
                 if (currentSolution != null) {
@@ -115,15 +106,14 @@ public class GridPanel extends JPanel implements GridListener {
                     }
                 }
             } catch(SolutionsNotFoundException ex){
-                showSolutionsNotFoundDialog();
+                showErrorDialog("Unsolvable game!","There are no solutions for this game!");
             }
         }
-
         repaint();
         revalidate();
     }
 
-    private void rebuildGrid(int n) {
+    private void rebuildGrid(GridInterface grid, int n) {
         this.gridSize = n;
         this.buttonGrid = new JToggleButton[n][n];
         this.inputGrid = new JTextField[n][n];
@@ -256,6 +246,16 @@ public class GridPanel extends JPanel implements GridListener {
         }
     }
 
+    public void startGameView() {
+        for (int i = 0; i < gridSize; i++) {
+            for (int j = 0; j < gridSize; j++) {
+                JTextField input = inputGrid[i][j];
+                input.setEnabled(true);
+            }
+        }
+        revalidate();
+    }
+
     public boolean[][] getSelectedSquares() {
         boolean[][] selectedSquares = new boolean[gridSize][gridSize];
         for (int i = 0; i < gridSize; i++) {
@@ -264,18 +264,6 @@ public class GridPanel extends JPanel implements GridListener {
             }
         }
         return selectedSquares;
-    }
-
-    public void showSelectionError() {
-        JFrame mainFrame = (JFrame) SwingUtilities.getWindowAncestor(this);
-        JOptionPane.showMessageDialog(mainFrame, "At least one square must be selected",
-                "Invalid cage selection", JOptionPane.ERROR_MESSAGE);
-    }
-
-    public void showAdjacencyError() {
-        JFrame mainFrame = (JFrame) SwingUtilities.getWindowAncestor(this);
-        JOptionPane.showMessageDialog(mainFrame,"Square selected have to be adjacent in order to bulid a cage.\n" +
-                "Please change selection.", "Invalid cage selection",JOptionPane.ERROR_MESSAGE);
     }
 
     public int getLockedSquares() {
@@ -289,7 +277,7 @@ public class GridPanel extends JPanel implements GridListener {
         return lockedSquares;
     }
 
-    public int getTargetResult() {
+    public int getTargetResultInput() {
         JFrame mainFrame = (JFrame) SwingUtilities.getWindowAncestor(this);
         boolean targetResultObtained = false;
         int result = 0;
@@ -307,7 +295,7 @@ public class GridPanel extends JPanel implements GridListener {
         return result;
     }
 
-    public MathOperation getOperation() {
+    public MathOperation getOperationInput() {
         JFrame mainFrame = (JFrame) SwingUtilities.getWindowAncestor(this);
         boolean operationObtained = false;
         String operation = null;
@@ -335,17 +323,7 @@ public class GridPanel extends JPanel implements GridListener {
         return mathOperation;
     }
 
-    public void startGameView() {
-        for (int i = 0; i < gridSize; i++) {
-            for (int j = 0; j < gridSize; j++) {
-                JTextField input = inputGrid[i][j];
-                input.setEnabled(true);
-            }
-        }
-        revalidate();
-    }
-
-    public String getFilePath() {
+    public String getFilePathInput() {
         JFileChooser chooser = new JFileChooser();
         chooser.setSelectedFile(new File("myGame.kenken"));
         chooser.setFileFilter(new FileNameExtensionFilter(".kenken files","kenken"));
@@ -358,7 +336,7 @@ public class GridPanel extends JPanel implements GridListener {
         return null;
     }
 
-    public int getMaxSolutions() {
+    public int getMaxSolutionsInput() {
         JFrame topFrame = (JFrame) SwingUtilities.getWindowAncestor(this);
         int maxSolutions = 0;
         boolean validInput = false;
@@ -376,21 +354,9 @@ public class GridPanel extends JPanel implements GridListener {
         return maxSolutions;
     }
 
-
-    public void showSolutionsNotFoundDialog() {
+    public void showErrorDialog(String title, String message) {
         JFrame mainFrame = (JFrame) SwingUtilities.getWindowAncestor(this);
-        JOptionPane.showMessageDialog(mainFrame,"There are no solutions for this game!",
-                "Unsolvable game",JOptionPane.ERROR_MESSAGE);
-    }
-
-    public void showLoadErrorDialog() {
-        JFrame mainFrame = (JFrame) SwingUtilities.getWindowAncestor(this);
-        JOptionPane.showMessageDialog(mainFrame,"The file selected may be damaged or incompatible", "An error occurred trying to load the game",JOptionPane.ERROR_MESSAGE);
-    }
-
-    public void showSaveErrorDialog() {
-        JFrame mainFrame = (JFrame) SwingUtilities.getWindowAncestor(this);
-        JOptionPane.showMessageDialog(mainFrame,"Cannot save an empty game!", "An error occurred trying to save the game",JOptionPane.ERROR_MESSAGE);
+        JOptionPane.showMessageDialog(mainFrame, message, title,JOptionPane.ERROR_MESSAGE);
     }
 
     public boolean showNewGameDialog() {
