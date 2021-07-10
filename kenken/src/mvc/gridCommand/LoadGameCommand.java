@@ -26,12 +26,13 @@ public class LoadGameCommand implements Command {
         String filePath = gridPanel.getFilePath();
         if(filePath != null) {
             if(!grid.load(filePath)) gridPanel.showLoadErrorDialog();
-            controllerPanel.enableControlButtons();
-            controllerPanel.setStartGameButton(true);
-            controllerPanel.setCreateCageButton(false);
-            controllerPanel.setCheckConstraintsButton(false);
-            controllerPanel.setClearGridButton(false);
-            controllerPanel.setShowSolutionsButton(false);
+            else {
+                controllerPanel.setStartGameButton(true);
+                controllerPanel.setCreateCageButton(false);
+                controllerPanel.setCheckConstraintsButton(false);
+                controllerPanel.setClearGridButton(false);
+                controllerPanel.setShowSolutionsButton(false);
+            }
         }
         return false;
     }

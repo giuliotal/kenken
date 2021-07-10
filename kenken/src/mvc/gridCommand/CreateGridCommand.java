@@ -24,7 +24,7 @@ public class CreateGridCommand implements Command {
     public boolean doIt() {
         if(grid.getSize()!= 0 && !gridPanel.showNewGameDialog()) return false;
         grid.setSize(n);
-        controllerPanel.enableControlButtons();
+        controllerPanel.setCreateCageButton(true);
         controllerPanel.setClearGridButton(false);
         controllerPanel.setCheckConstraintsButton(false);
         controllerPanel.setShowSolutionsButton(false);

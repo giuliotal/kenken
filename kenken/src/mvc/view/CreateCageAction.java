@@ -2,11 +2,12 @@ package mvc.view;
 
 import command.CommandHandler;
 import mvc.gridCommand.CreateCageCommand;
-import mvc.model.Grid;
-import mvc.model.GridInterface;
+import mvc.model.*;
 
 import javax.swing.*;
 import java.awt.event.ActionEvent;
+import java.util.LinkedList;
+import java.util.List;
 
 public class CreateCageAction extends AbstractAction {
 
@@ -22,15 +23,35 @@ public class CreateCageAction extends AbstractAction {
 
     @Override
     public void actionPerformed(ActionEvent actionEvent) {
-        if(!gridPanel.checkSelection()) return;
 
         boolean[][] selectedSquares = gridPanel.getSelectedSquares();
+        boolean buttonSelected = false;
+        for (int i = 0; i < selectedSquares.length && !buttonSelected; i++)
+            for (int j = 0; j < selectedSquares.length && !buttonSelected; j++)
+                if(selectedSquares[i][j]) buttonSelected = true;
+
+        if(!buttonSelected) {
+            gridPanel.showSelectionError();
+            return;
+        }
+        if(!Cage.verifyAdjacency(selectedSquares)) {
+            gridPanel.showAdjacencyError();
+            return;
+        }
 
         int result = gridPanel.getTargetResult();
         if(result == -1) return;
 
-        Grid.MathOperation operation = gridPanel.getOperation();
+        MathOperation operation = gridPanel.getOperation();
         if(operation == null) return;
-        commandHandler.handle(new CreateCageCommand(grid, selectedSquares, result, operation));
+
+        List<Square> squares = new LinkedList<>();
+        for (int i = 0; i < selectedSquares.length; i++) {
+            for (int j = 0; j < selectedSquares.length; j++) {
+                if(selectedSquares[i][j]) squares.add(new Square(i,j));
+            }
+        }
+
+        commandHandler.handle(new CreateCageCommand(grid, squares.toArray(new Square[squares.size()]), result, operation));
     }
 }
