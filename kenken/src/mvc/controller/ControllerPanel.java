@@ -98,6 +98,7 @@ public class ControllerPanel extends JPanel implements GridListener {
         startGameButton.addActionListener(new ActionListener() {
             public void actionPerformed(ActionEvent actionEvent) {
                 gridPanel.startGameView();
+                gameStarted = true;
                 startGameButton.setEnabled(false);
                 checkConstraintsButton.setEnabled(true);
                 clearGridButton.setEnabled(true);
@@ -124,7 +125,7 @@ public class ControllerPanel extends JPanel implements GridListener {
         gameCommands.add(clearGridButton);
 
         showSolutionsButton = new JButton("Show solutions");
-        showSolutionsButton.addActionListener(evt -> new ShowSolutionsCommand(grid, gridPanel));
+        showSolutionsButton.addActionListener(evt -> commandHandler.handle(new ShowSolutionsCommand(grid, gridPanel)));
         showSolutionsButton.setEnabled(false);
         gameCommands.add(showSolutionsButton);
 
@@ -173,7 +174,6 @@ public class ControllerPanel extends JPanel implements GridListener {
             int n = e.getSource().getSize();
             int lockedSquares = gridPanel.getLockedSquares();
             if(lockedSquares == n*n && !gameStarted){
-                gameStarted = true;
                 startGameButton.setEnabled(true);
                 createCageButton.setEnabled(false);
             }
