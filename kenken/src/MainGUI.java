@@ -9,8 +9,28 @@ import mvc.view.GridPanel;
 
 import javax.swing.*;
 import java.awt.*;
+import java.io.BufferedReader;
+import java.io.FileReader;
+import java.io.IOException;
 
 public class MainGUI {
+
+    private static String readFile(String pathName) {
+        String text = null;
+        try {
+            BufferedReader br = new BufferedReader(new FileReader(pathName));
+            StringBuilder sb = new StringBuilder();
+            String line = br.readLine();
+            while(line!=null) {
+                sb.append(line);
+                sb.append("\n");
+                line = br.readLine();
+            }
+            text = sb.toString();
+        }catch(IOException e) {e.printStackTrace();}
+        return text;
+    }
+
     public static void main(String[] args) {
 
         JFrame frame = new JFrame();
@@ -48,7 +68,13 @@ public class MainGUI {
 
         JMenu help = new JMenu("Help");
         JMenuItem howToPlay = new JMenuItem("How to play");
+        String howToText = readFile("how_to_play.txt");
+        howToPlay.addActionListener(evt -> JOptionPane.showMessageDialog(frame, howToText,"How to play",JOptionPane.INFORMATION_MESSAGE));
+
         JMenuItem rules = new JMenuItem("KenKen rules");
+        String rulesText = readFile("rules.txt");
+        rules.addActionListener(evt -> JOptionPane.showMessageDialog(frame, rulesText,"KenKen rules",JOptionPane.INFORMATION_MESSAGE));
+
         help.add(rules);
         help.add(howToPlay);
 

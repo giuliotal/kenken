@@ -1,0 +1,6 @@
+1.  Choose the desired grid size from the menu "New game": an empty grid will be displayed.
+2.  Define the game configuration by selecting each square you want to add to a cage.
+    The game cannot start until each square belongs to a cage.
+3   If you are happy with the configuration, press the "Start button".
+    Else, press the UNDO button to rollback until you create the desired configuration.
+4.  You are ready to enter numbers with the keyboard and complete the game!

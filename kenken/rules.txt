@@ -1,0 +1,10 @@
+Your goal is to fill in the whole grid with numbers, making sure 
+no number is repeated in any row or column.
+
+In a 3x3 puzzle, use the numbers 1-3.
+In a 4x4 puzzle, use the numbers 1-4 and so on.
+
+The heavily-outlined areas are called "cages": the top left corner of
+each cage has a "target number" and math operation. The numbers you enter
+int o cage must combine (in any order) to produce the target number using 
+the math operation noted (+, -, *, or /).
