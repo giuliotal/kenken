@@ -66,7 +66,7 @@ public class GridTest {
     @Test(timeout = TIMEOUT)
     public void checkConstraints() {
         grid.setSize(3);
-        // creo un blocco vi inserisco dei valori che non rispettano i vincoli del giooc
+        // creo un blocco vi inserisco dei valori che non rispettano i vincoli del gioco
         defineGrid();
         assertFalse("Invalid grid",grid.checkConstraints());
 
@@ -120,7 +120,7 @@ public class GridTest {
     }
 
     @Test(timeout = TIMEOUT)
-    public void createCageAliasing() {
+    public void createCageCheckAliasing() {
         grid.setSize(3);
         Square s1 = new Square(0,0);
         Square s2 = new Square(0,1);
