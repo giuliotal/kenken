@@ -20,7 +20,7 @@ public class LoadGameCommand implements Command {
 
     @Override
     public boolean doIt() {
-        String filePath = gridPanel.getFilePathInput();
+        String filePath = gridPanel.getFilePathInput(GridPanel.FILE_OP.LOAD_OP);
         if(filePath != null) {
             if(!grid.load(filePath))
                 gridPanel.showErrorDialog("An error occurred trying to load the game",

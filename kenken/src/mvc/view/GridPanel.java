@@ -21,6 +21,8 @@ import java.util.List;
 // Concrete Observer (VIEW)
 public class GridPanel extends JPanel implements GridListener {
 
+    public enum FILE_OP {LOAD_OP, SAVE_OP};
+
     private final CommandHandler commandHandler;
     private int gridSize;
     private JToggleButton[][] buttonGrid;
@@ -323,17 +325,24 @@ public class GridPanel extends JPanel implements GridListener {
         return mathOperation;
     }
 
-    public String getFilePathInput() {
+    public String getFilePathInput(FILE_OP fileOp) {
+        JFrame topFrame = (JFrame) SwingUtilities.getWindowAncestor(this);
         JFileChooser chooser = new JFileChooser();
         chooser.setSelectedFile(new File("myGame.kenken"));
         chooser.setFileFilter(new FileNameExtensionFilter(".kenken files","kenken"));
+        String filePath = null;
         if(chooser.showDialog(this, "Select") == JFileChooser.APPROVE_OPTION) {
-            String filePath = chooser.getSelectedFile().getAbsolutePath();
+            filePath = chooser.getSelectedFile().getAbsolutePath();
             if (!filePath .endsWith(".kenken"))
                 filePath += ".kenken";
-                return filePath;
+            if(fileOp==FILE_OP.SAVE_OP && new File(filePath).exists()) {
+                int ret = JOptionPane.showConfirmDialog(topFrame,
+                        "Do you want to override it?", "File already exists", JOptionPane.YES_NO_OPTION);
+                if(ret == JOptionPane.YES_OPTION) return filePath;
+                else return null;
+            }
         }
-        return null;
+        return filePath;
     }
 
     public int getMaxSolutionsInput() {
