@@ -1,3 +1,6 @@
 # Ignore libreoffice lock files
 .~lock.*
 .fuse*
+
+# Ignore final zip
+*.zip
